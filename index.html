@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <!--
+            Inclusion de la bibliothèque Leaflet et sa feuille de style.
+            L'include du js pourrait aussi être fait à la fin du <body>
+        -->
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+        <!-- Une feuille de style éventuelle -->
+        <link rel="stylesheet" href="style.css">
+
+        <title>Tutoriel Leaflet OSM</title>
+    </head>
+    <body>
+        <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
+        <div id="macarte" style="width:545px; height:490px"></div>
+    </body>
+    <script>
+	var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);
+
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(carte);
+        
+	var marker = L.marker([43.6043 , 1.4437]).addTo(carte);
+        var influence = L.circle([43.6043 , 1.4437], 2100).addTo(carte);
+
+	marker.bindPopup('');
+	var mapopup = marker.getPopup();
+	mapopup.setContent('Toulouse');
+	marker.openPopup();
+    </script>
+</html>
