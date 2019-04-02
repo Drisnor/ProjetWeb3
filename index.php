@@ -52,12 +52,30 @@
         <script type="text/javascript">
         	var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse
 
-        	/* Vue de la carte */
+            /* Ajout d'un layer pour switch l'affichage des "points" : ecoles / parcs */
+            var baseLayers = {
+              'Positron' : new L.TileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+              }),
+              'Dark Matter':  new L.TileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',{
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+              })
+            }
+
+            /* Vue de la carte */
         	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
              	maxZoom: 17,
-             	minZoom: 12
+             	minZoom: 12,
+                  layers: [
+                    baseLayers.Positron
+                  ]
             }).addTo(carte);
+
+            /* Ajout du formulaire sur la carte */
+            // TODO : Zø
+            L.control.layers(baseLayers).addTo(carte);
+
 
             /* Affichage des marqueurs en fonction de données */
             var data = <?php echo JSON_encode($ecoles); ?>;
