@@ -50,12 +50,7 @@
 
         <!-- Affichage de la carte -->
         <script type="text/javascript">
-        	var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse
-
-            /* Ajout d'un layer pour switch l'affichage des "points" : ecoles / parcs */
-			
-
-			
+        	var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse			
 				
             /* Vue de la carte */
         	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -71,10 +66,41 @@
             var dataEcoles = <?php echo JSON_encode($ecoles); ?>;
             dataEcoles = JSON.parse(dataEcoles);
 			
+            // lien galerie d'images : https://postimg.cc/gallery/3891zxw0g/
+            /* Icone pour les écoles */
+            var LeafIcon = L.Icon.extend({
+                options: {
+                   iconSize:     [20, 20]
+                   /*,
+                   shadowSize:   [50, 64],
+                   iconAnchor:   [22, 94],
+                   shadowAnchor: [4, 62],
+                   popupAnchor:  [-3, -76]*/
+                }
+            });
+
+            var iconEcole = new LeafIcon({
+                iconUrl: 'https://i.postimg.cc/50XtqXKN/Icon-Ecole.png'
+            });
+
+            var parcVert = new LeafIcon({
+                iconUrl: 'https://i.postimg.cc/ZYf404TK/ParcV.png'
+            });
+            
+            var parcOrange = new LeafIcon({
+                iconUrl: 'https://i.postimg.cc/8cCGwnbS/ParcO.png'
+            });
+
+            var parcRouge = new LeafIcon({
+                iconUrl: 'https://i.postimg.cc/gjBW7qM6/ParcR.png'
+            });
+
+
+            /* Données des écoles */
 			var Ecoles = L.layerGroup();
 			
             for (var i = 0; i < dataEcoles.length; i++) {
-                L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude])
+                L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
                  .bindPopup(dataEcoles[i].ecole)
                  .addTo(Ecoles);
             }
@@ -83,28 +109,26 @@
             var dataJeux = <?php echo JSON_encode($jeux); ?>;
             dataJeux = JSON.parse(dataJeux);
 			
+
+            /* Données pour les jeux */
 			var Jeux = L.layerGroup();
-			
+
             for (var i = 0; i < dataJeux.length; i++) {
-                L.marker([dataJeux[i].longitude, dataJeux[i].latitude],{iconUrl: "images/ParcV.png"})
+                L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : parcVert})
+                    /* TODO Catégorie de parcs en fonction de la SUPERFICIE : Logos rouge > orange > vert */
+                     // + placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic
+
                  .bindPopup(dataJeux[i].nom)
                  .addTo(Jeux);
             }
 
+            /* Choix de l'affichage des données */
 			var overlays = {
 				"Ecoles": Ecoles,
 				"Jeux": Jeux
 			}
             /* Ajout du formulaire sur la carte */
             L.control.layers({},overlays).addTo(carte);
-
-
-
-
-            /* Marqueurs sur la map */
-
-            /* TODO Catégorie de parcs en fonction de la SUPERFICIE : Logos rouge > orange > vert */
-            // + placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic
 
         </script>
     </body>
