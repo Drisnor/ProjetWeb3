@@ -110,9 +110,6 @@
             dataJeux = JSON.parse(dataJeux);
 			
             /* Catégories des parcs (petit, moyen, grand) en fonction de la superficie (en m²) 
-				Petit : 0 - 27  m² 
-				Moyen : 28 - 55 m²
-				Grand : 56 - 79 m²
              */
              /* TODO => Accéder aux données facilement/rapidement afin d'affecter les icones en fonction de la superficie */
              /* TODO placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic */
@@ -131,8 +128,19 @@
             		icone = parcVert;
             	}
 
+                /* popup (onClick) qui affiche toutes les informations de chaque parc */
+                var popup = L.popup({className: 'if-you-need-a-class'})
+                    .setContent('<div class="if-you-need-div">'+
+                    '<h3>' + dataJeux[i].nom + '</h3>'+
+                    '<p><b> Superficie : ' + dataJeux[i].superficie + ' m²</b><br>'+
+                    '<b> Note : ' + dataJeux[i].note + '/5</b><br>'+  /* TODO Pouvoir modif les CHAMPS + notes avec les étoiles */
+                    '</p>'+
+                    '</div>'
+                );
+
+                /* Ajout des infos sur la carte */
                 L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
-                 .bindPopup(dataJeux[i].nom)
+                 .bindPopup(popup)
                  .addTo(Jeux);
             }
 
