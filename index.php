@@ -109,15 +109,29 @@
             var dataJeux = <?php echo JSON_encode($jeux); ?>;
             dataJeux = JSON.parse(dataJeux);
 			
+            /* Catégories des parcs (petit, moyen, grand) en fonction de la superficie (en m²) 
+				Petit : 0 - 27  m² 
+				Moyen : 28 - 55 m²
+				Grand : 56 - 79 m²
+             */
+             /* TODO => Accéder aux données facilement/rapidement afin d'affecter les icones en fonction de la superficie */
+             /* TODO placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic */
 
             /* Données pour les jeux */
 			var Jeux = L.layerGroup();
 
             for (var i = 0; i < dataJeux.length; i++) {
-                L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : parcVert})
-                    /* TODO Catégorie de parcs en fonction de la SUPERFICIE : Logos rouge > orange > vert */
-                     // + placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic
+            	var icone;
+            	// Catégorie de parcs en fonction de la SUPERFICIE / nbJeux (différents icônes)
+            	if ( dataJeux[i].superficie >= 0 && dataJeux[i].superficie < 15) {
+            		icone = parcRouge;
+            	} else if (dataJeux[i].superficie > 15 && dataJeux[i].superficie <= 30) {
+            		icone = parcOrange;
+            	} else {
+            		icone = parcVert;
+            	}
 
+                L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
                  .bindPopup(dataJeux[i].nom)
                  .addTo(Jeux);
             }
