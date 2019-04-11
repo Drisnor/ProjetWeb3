@@ -31,6 +31,7 @@
         }
     }
 
+
     /* ***************************************************************** */
     /* test() */
     //coordsEcole($ecoles);
@@ -41,7 +42,8 @@
     <head>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
         <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
     </head>
     <body>
@@ -127,16 +129,63 @@
             	} else {
             		icone = parcVert;
             	}
+				
+				/* Note des parcs avec etoiles*/
+				var star ="<span class='rating'>"
+					  +"<input id='rating5' type='radio' name='rating' value='5'>"
+					  +"<label for='rating5'>5</label>"
+					  +"<input id='rating4' type='radio' name='rating' value='4'>"
+					  +"<label for='rating4'>4</label>"
+					  +"<input id='rating3' type='radio' name='rating' value='3'>"
+					  +"<label for='rating3'>3</label>"
+					  +"<input id='rating2' type='radio' name='rating' value='2' checked>"
+					  +"<label for='rating2'>2</label>"
+					  +"<input id='rating1' type='radio' name='rating' value='1'>"
+					  +"<label for='rating1'>1</label>"
+					  +"</span> ";
+					  
+				/* Affichage des données des parcs dans les popups */
+				// TODO Pouvoir modif les CHAMPS + notes avec les étoiles 				
+				var content = function() {
+					$("h3").append(dataJeux[i].nom);
+					var para = $("p").append("<p>Test</p>");/*
+					var node = document.createTextNode("<p><b> Superficie : " + dataJeux[i].superficie + ' m²</b><br>');
+					var node2 = document.createTextNode('<b> Note : ' + dataJeux[i].note + '/5</b><br>');
+					
 
+	
+					var titre = document.createElement("h3");
+					titre.innerHTML = dataJeux[i].nom;*/
+
+
+					// Ecouteur pour clic
+					para.addEventListener('click', function() { console.log('clicked'); });
+					
+					return para;
+				}
+					  
                 /* popup (onClick) qui affiche toutes les informations de chaque parc */
-                var popup = L.popup({className: 'if-you-need-a-class'})
-                    .setContent('<div class="if-you-need-div">'+
-                    '<h3>' + dataJeux[i].nom + '</h3>'+
-                    '<p><b> Superficie : ' + dataJeux[i].superficie + ' m²</b><br>'+
-                    '<b> Note : ' + dataJeux[i].note + '/5</b><br>'+  /* TODO Pouvoir modif les CHAMPS + notes avec les étoiles */
-                    '</p>'+
-                    '</div>'
+                var popup = L.popup({className: 'popup'})
+                    .setContent(content()
                 );
+				
+				
+				
+				/* Ajout d'ecoute sur les etoiles liés aux parcs */
+				/* var star5 = document.getElementById("rating5");
+				star5.addEventListener("click", test);
+				
+				var star4 = document.getElementById("rating4");
+				star4.addEventListener("click", test);
+
+				var star3 = document.getElementById("rating3");
+				star3.addEventListener("click", test);
+
+				var star2 = document.getElementById("rating2");
+				star2.addEventListener("click", test);
+
+				var star1 = document.getElementById("rating1");
+				star1.addEventListener("click", test);	 */
 
                 /* Ajout des infos sur la carte */
                 L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
@@ -151,7 +200,11 @@
 			}
             /* Ajout du formulaire sur la carte */
             L.control.layers({},overlays).addTo(carte);
-
+			
+			function test(e){
+				console.log(e.originalTarget.defaultValue);
+			}
         </script>
+
     </body>
 </html>
