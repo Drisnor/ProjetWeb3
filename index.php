@@ -45,6 +45,15 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
+
+        <style>
+            .leaflet-popup-content {
+                width: 150px;
+                height: 150px;
+                /*overflow-y: scroll; (scrollbar) */
+            }
+        </style>
+
     </head>
     <body>
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
@@ -113,7 +122,6 @@
 			
             /* Catégories des parcs (petit, moyen, grand) en fonction de la superficie (en m²) 
              */
-             /* TODO => Accéder aux données facilement/rapidement afin d'affecter les icones en fonction de la superficie */
              /* TODO placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic */
 
             /* Données pour les jeux */
@@ -131,14 +139,15 @@
             	}
 				
 				/* Note des parcs avec etoiles*/
-				var star ="<span class='rating'>"
+				var star =
+                    "<span class='rating'>"
 					  +"<input id='rating5' type='radio' name='rating' value='5'>"
 					  +"<label for='rating5'>5</label>"
 					  +"<input id='rating4' type='radio' name='rating' value='4'>"
 					  +"<label for='rating4'>4</label>"
 					  +"<input id='rating3' type='radio' name='rating' value='3'>"
 					  +"<label for='rating3'>3</label>"
-					  +"<input id='rating2' type='radio' name='rating' value='2' checked>"
+					  +"<input id='rating2' type='radio' name='rating' value='2'>"
 					  +"<label for='rating2'>2</label>"
 					  +"<input id='rating1' type='radio' name='rating' value='1'>"
 					  +"<label for='rating1'>1</label>"
@@ -146,30 +155,44 @@
 					  
 				/* Affichage des données des parcs dans les popups */
 				// TODO Pouvoir modif les CHAMPS + notes avec les étoiles 				
-				var content = function() {
-					$("h3").append(dataJeux[i].nom);
-					var para = $("p").append("<p>Test</p>");/*
-					var node = document.createTextNode("<p><b> Superficie : " + dataJeux[i].superficie + ' m²</b><br>');
-					var node2 = document.createTextNode('<b> Note : ' + dataJeux[i].note + '/5</b><br>');
-					
 
-	
-					var titre = document.createElement("h3");
-					titre.innerHTML = dataJeux[i].nom;*/
+				// Ecouteur pour clic
+                function contenu() {
+                    /* Création des éléments pour le DOM */
+                    var div = document.createElement("div");
+                    var p = document.createElement("p");
+                    var br = document.createElement("br");
+
+                    var titre = document.createElement("h3");
+                    titre.innerHTML = dataJeux[i].nom;
+
+                    var node = document.createTextNode('Superficie : ' + dataJeux[i].superficie + ' m²');
+                    var node2 = document.createTextNode('Note : ' + dataJeux[i].note + '/5');
+
+                    // Ajout des éléments dans le DOM
+                    div.appendChild(titre);
+                    p.appendChild(node);
+                    p.appendChild(br);
+                    p.appendChild(node2);
+                    div.appendChild(p);
+
+                    
+                    // Ajout de la note avec les étoiles
+                    var wrapper= document.createElement('span');
+                    wrapper.innerHTML= star;  // Récupération de l'HTML pour afficher les étoiles
+
+                    /* Ecouteur de clics sur les notes */
+                    wrapper.addEventListener('click', function() { console.log('clicked'); });
+
+                    div.appendChild(wrapper);
+
+                    return div;
+                }
 
 
-					// Ecouteur pour clic
-					para.addEventListener('click', function() { console.log('clicked'); });
-					
-					return para;
-				}
 					  
                 /* popup (onClick) qui affiche toutes les informations de chaque parc */
-                var popup = L.popup({className: 'popup'})
-                    .setContent(content()
-                );
-				
-				
+                var popup = L.popup().setContent(contenu());
 				
 				/* Ajout d'ecoute sur les etoiles liés aux parcs */
 				/* var star5 = document.getElementById("rating5");
