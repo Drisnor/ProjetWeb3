@@ -31,7 +31,6 @@
         }
     }
 
-
     /* ***************************************************************** */
     /* test() */
     //coordsEcole($ecoles);
@@ -57,7 +56,7 @@
     </head>
     <body>
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
-        <div id="macarte" style="width: 80%; height: 800px;"></div>
+        <div id="macarte" style="width: auto; height: 800px;"></div>
 
         <!-- Affichage de la carte -->
         <script type="text/javascript">
@@ -66,7 +65,7 @@
             /* Vue de la carte */
         	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-             	maxZoom: 17,
+             	maxZoom: 16,
              	minZoom: 12,
                   layers: [
 					Ecoles
@@ -149,14 +148,15 @@
 					  +"<label for='rating3'>3</label>"
 					  +"<input id='rating2' type='radio' name='rating' value='2'>"
 					  +"<label for='rating2'>2</label>"
-					  +"<input id='rating1' type='radio' name='rating' value='1'>"
+					  +"<input id='rating1' type='radio' name='rating' value='1' checked>"  // TODO par défaut = NOTE BDD
 					  +"<label for='rating1'>1</label>"
 					  +"</span> ";
-					  
-				/* Affichage des données des parcs dans les popups */
-				// TODO Pouvoir modif les CHAMPS + notes avec les étoiles 				
 
-				// Ecouteur pour clic
+				/* Affichage des données des parcs dans les popups */
+				// TODO Pouvoir modif les CHAMPS (+ notes)				
+                var notes = dataJeux[i].note;
+
+				// Ajout du contenu dans chaque popup pour les parcs
                 function contenu() {
                     /* Création des éléments pour le DOM */
                     var div = document.createElement("div");
@@ -182,8 +182,12 @@
                     wrapper.innerHTML= star;  // Récupération de l'HTML pour afficher les étoiles
 
                     /* Ecouteur de clics sur les notes */
-                    wrapper.addEventListener('click', function() { console.log('clicked'); });
+                    wrapper.addEventListener('click', function(e) { 
+                        var noteChoisie = $("input[name='rating']:checked").val() ; 
+                        console.log(noteChoisie);
 
+                        // TODO Empêcher le spam de clic pour ne pas trop faire d'updates
+                    });  // TODO MODIF NOTE en fonction du clic
                     div.appendChild(wrapper);
 
                     return div;
@@ -193,22 +197,6 @@
 					  
                 /* popup (onClick) qui affiche toutes les informations de chaque parc */
                 var popup = L.popup().setContent(contenu());
-				
-				/* Ajout d'ecoute sur les etoiles liés aux parcs */
-				/* var star5 = document.getElementById("rating5");
-				star5.addEventListener("click", test);
-				
-				var star4 = document.getElementById("rating4");
-				star4.addEventListener("click", test);
-
-				var star3 = document.getElementById("rating3");
-				star3.addEventListener("click", test);
-
-				var star2 = document.getElementById("rating2");
-				star2.addEventListener("click", test);
-
-				var star1 = document.getElementById("rating1");
-				star1.addEventListener("click", test);	 */
 
                 /* Ajout des infos sur la carte */
                 L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
@@ -223,10 +211,10 @@
 			}
             /* Ajout du formulaire sur la carte */
             L.control.layers({},overlays).addTo(carte);
-			
-			function test(e){
-				console.log(e.originalTarget.defaultValue);
-			}
+
+            // Affichage des aires de jeux par défaut
+            Jeux.addTo(carte);
+
         </script>
 
     </body>
