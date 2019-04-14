@@ -21,7 +21,7 @@
     // Conversions des données en JSON
     $ecoles = JSON_encode($ecoles);
     $jeux = JSON_encode($jeux);
-
+    
     // test
     function coordsEcole($data) {
         /* Affichage des données */
@@ -41,8 +41,8 @@
     <head>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
         <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
 
         <style>
@@ -60,22 +60,22 @@
 
         <!-- Affichage de la carte -->
         <script type="text/javascript">
-        	var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse			
-				
+            var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse         
+                
             /* Vue de la carte */
-        	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-             	maxZoom: 16,
-             	minZoom: 12,
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 16,
+                minZoom: 12,
                   layers: [
-					Ecoles
+                    Ecoles
                   ]
             }).addTo(carte);
-			
-			/* Affichage des marqueurs en fonction de données */
+            
+            /* Affichage des marqueurs en fonction de données */
             var dataEcoles = <?php echo JSON_encode($ecoles); ?>;
             dataEcoles = JSON.parse(dataEcoles);
-			
+            
             // lien galerie d'images : https://postimg.cc/gallery/3891zxw0g/
             /* Icone pour les écoles */
             var LeafIcon = L.Icon.extend({
@@ -107,56 +107,60 @@
 
 
             /* Données des écoles */
-			var Ecoles = L.layerGroup();
-			
+            var Ecoles = L.layerGroup();
+            
             for (var i = 0; i < dataEcoles.length; i++) {
                 L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
                  .bindPopup(dataEcoles[i].ecole)
                  .addTo(Ecoles);
             }
 
-			/* Affichage des marqueurs en fonction de données */
+            /* Affichage des marqueurs en fonction de données */
             var dataJeux = <?php echo JSON_encode($jeux); ?>;
             dataJeux = JSON.parse(dataJeux);
-			
+            
             /* Catégories des parcs (petit, moyen, grand) en fonction de la superficie (en m²) 
              */
              /* TODO placer les repères / polygones => Les rendre cliquables et identifier le parc en fonction du clic */
 
             /* Données pour les jeux */
-			var Jeux = L.layerGroup();
+            var Jeux = L.layerGroup();
 
             for (var i = 0; i < dataJeux.length; i++) {
-            	var icone;
-            	// Catégorie de parcs en fonction de la SUPERFICIE / nbJeux (différents icônes)
-            	if ( dataJeux[i].superficie >= 0 && dataJeux[i].superficie < 15) {
-            		icone = parcRouge;
-            	} else if (dataJeux[i].superficie > 15 && dataJeux[i].superficie <= 30) {
-            		icone = parcOrange;
-            	} else {
-            		icone = parcVert;
-            	}
-				
-				/* Note des parcs avec etoiles*/
-				var star =
+                var icone;
+                // Catégorie de parcs en fonction de la SUPERFICIE / nbJeux (différents icônes)
+                if ( dataJeux[i].superficie >= 0 && dataJeux[i].superficie < 15) {
+                    icone = parcRouge;
+                } else if (dataJeux[i].superficie > 15 && dataJeux[i].superficie <= 30) {
+                    icone = parcOrange;
+                } else {
+                    icone = parcVert;
+                }
+
+                /* Note des parcs avec etoiles*/
+                var star =
                     "<span class='rating'>"
-					  +"<input id='rating5' type='radio' name='rating' value='5'>"
-					  +"<label for='rating5'>5</label>"
-					  +"<input id='rating4' type='radio' name='rating' value='4'>"
-					  +"<label for='rating4'>4</label>"
-					  +"<input id='rating3' type='radio' name='rating' value='3'>"
-					  +"<label for='rating3'>3</label>"
-					  +"<input id='rating2' type='radio' name='rating' value='2'>"
-					  +"<label for='rating2'>2</label>"
-					  +"<input id='rating1' type='radio' name='rating' value='1' checked>"  // TODO par défaut = NOTE BDD
-					  +"<label for='rating1'>1</label>"
-					  +"</span> ";
+                      +"<input id='rating5' type='radio' name='rating' value='5' >"
+                      +"<label for='rating5'>5</label>"
+                      +"<input id='rating4' type='radio' name='rating' value='4' >"
+                      +"<label for='rating4'>4</label>"
+                      +"<input id='rating3' type='radio' name='rating' value='3' >"
+                      +"<label for='rating3'>3</label>"
+                      +"<input id='rating2' type='radio' name='rating' value='2' >"
+                      +"<label for='rating2'>2</label>"
+                      +"<input id='rating1' type='radio' name='rating' value='1' >"
+                      +"<label for='rating1'>1</label>"
+                      +"</span> ";
 
-				/* Affichage des données des parcs dans les popups */
-				// TODO Pouvoir modif les CHAMPS (+ notes)				
-                var notes = dataJeux[i].note;
+                // Assigne la note par défaut de chaque parc
+                var note = dataJeux[i].note;
+                var position = star.search("'"+note); // position de la value pour une note
+                var coche = "checked";
+                star = star.substr(0, position+4) + coche + star.substr(position+4);  // coche la bonne note
 
-				// Ajout du contenu dans chaque popup pour les parcs
+                /* Affichage des données des parcs dans les popups */
+                // TODO Pouvoir modif les CHAMPS (+ notes)              
+                // Ajout du contenu dans chaque popup pour les parcs
                 function contenu() {
                     /* Création des éléments pour le DOM */
                     var div = document.createElement("div");
@@ -181,20 +185,11 @@
                     var wrapper= document.createElement('span');
                     wrapper.innerHTML= star;  // Récupération de l'HTML pour afficher les étoiles
 
-                    /* Ecouteur de clics sur les notes */
-                    wrapper.addEventListener('click', function(e) { 
-                        var noteChoisie = $("input[name='rating']:checked").val() ; 
-                        console.log(noteChoisie);
-
-                        // TODO Empêcher le spam de clic pour ne pas trop faire d'updates
-                    });  // TODO MODIF NOTE en fonction du clic
                     div.appendChild(wrapper);
 
                     return div;
                 }
-
-
-					  
+                      
                 /* popup (onClick) qui affiche toutes les informations de chaque parc */
                 var popup = L.popup().setContent(contenu());
 
@@ -205,10 +200,10 @@
             }
 
             /* Choix de l'affichage des données */
-			var overlays = {
-				"Ecoles": Ecoles,
-				"Jeux": Jeux
-			}
+            var overlays = {
+                "Ecoles": Ecoles,
+                "Jeux": Jeux
+            }
             /* Ajout du formulaire sur la carte */
             L.control.layers({},overlays).addTo(carte);
 
