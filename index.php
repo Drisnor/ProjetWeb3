@@ -21,7 +21,7 @@
     // Conversions des données en JSON
     $ecoles = JSON_encode($ecoles);
     $jeux = JSON_encode($jeux);
-    
+
     // test
     function coordsEcole($data) {
         /* Affichage des données */
@@ -155,8 +155,8 @@
                 // Assigne la note par défaut de chaque parc
                 var note = dataJeux[i].note;
                 var position = star.search("'"+note); // position de la value pour une note
-                var coche = "checked";
-                star = star.substr(0, position+4) + coche + star.substr(position+4);  // coche la bonne note
+                var decalage = position+4;
+                star = star.substr(0, decalage) + "checked" + star.substr(decalage);  // coche la bonne note
 
                 /* Affichage des données des parcs dans les popups */
                 // TODO Pouvoir modif les CHAMPS (+ notes)              
@@ -184,6 +184,12 @@
                     // Ajout de la note avec les étoiles
                     var wrapper= document.createElement('span');
                     wrapper.innerHTML= star;  // Récupération de l'HTML pour afficher les étoiles
+
+                    wrapper.addEventListener('click', function(e) { 
+                        var noteChoisie = $("input[name='rating']:checked").val() ; 
+                        console.log(noteChoisie);
+                        // TODO Empêcher le spam de clic pour ne pas trop faire d'updates
+                    });  // TODO MODIF NOTE en fonction du clic
 
                     div.appendChild(wrapper);
 
