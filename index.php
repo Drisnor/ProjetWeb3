@@ -47,7 +47,7 @@
 
         <style>
             .leaflet-popup-content {
-                width: 150px;
+                width: 200px;
                 height: 150px;
                 /*overflow-y: scroll; (scrollbar) */
             }
@@ -113,6 +113,8 @@
                 L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
                  .bindPopup(dataEcoles[i].ecole)
                  .addTo(Ecoles);
+
+                 /* TODO : Le clic sur une école détermine les 3 meilleurs parcs : note / DISTANCE */
             }
 
             /* Affichage des marqueurs en fonction de données */
@@ -129,7 +131,7 @@
             for (var i = 0; i < dataJeux.length; i++) {
                 var icone;
                 // Catégorie de parcs en fonction de la SUPERFICIE / nbJeux (différents icônes)
-                if ( dataJeux[i].superficie >= 0 && dataJeux[i].superficie < 15) {
+                if ( dataJeux[i].superficie >= 0 && dataJeux[i].superficie <= 15) {
                     icone = parcRouge;
                 } else if (dataJeux[i].superficie > 15 && dataJeux[i].superficie <= 30) {
                     icone = parcOrange;
@@ -158,39 +160,35 @@
                 var decalage = position+4;
                 star = star.substr(0, decalage) + "checked" + star.substr(decalage);  // coche la bonne note
 
+                var formulaire = '<form id="popup-form" action="index.php" method="GET">'
+                    + '<label>Superficie : </label>' + dataJeux[i].superficie + ' m²'
+                    + '<input id="superficie" type="number" />'
+                    + '<table class="popup-table">'
+                        + '<tr>'
+                        +   '<th>Note:</th>'
+                        +   '<td id="note">' + star + '</td>'
+                        + '</tr>'
+                    + '</table>'
+                    + '<button id="btn" type="submit">Modifier</button>'
+                    + '</form>';
+
                 /* Affichage des données des parcs dans les popups */
-                // TODO Pouvoir modif les CHAMPS (+ notes)              
+                // TODO Pouvoir modif les CHAMPS (+ notes)  => formulaire dans les popups ++ pour les écoles            
                 // Ajout du contenu dans chaque popup pour les parcs
                 function contenu() {
                     /* Création des éléments pour le DOM */
                     var div = document.createElement("div");
-                    var p = document.createElement("p");
-                    var br = document.createElement("br");
-
                     var titre = document.createElement("h3");
                     titre.innerHTML = dataJeux[i].nom;
+                    div.appendChild(titre);
 
-                    var node = document.createTextNode('Superficie : ' + dataJeux[i].superficie + ' m²');
-                    var node2 = document.createTextNode('Note : ' + dataJeux[i].note + '/5');
+                    /* Tableau pour présenter le formulaire de modification des données */
+                    var node2 = document.createTextNode('Note : ');
 
                     // Ajout des éléments dans le DOM
-                    div.appendChild(titre);
-                    p.appendChild(node);
-                    p.appendChild(br);
-                    p.appendChild(node2);
-                    div.appendChild(p);
-
-                    
-                    // Ajout de la note avec les étoiles
-                    var wrapper= document.createElement('span');
-                    wrapper.innerHTML= star;  // Récupération de l'HTML pour afficher les étoiles
-
-                    wrapper.addEventListener('click', function(e) { 
-                        var noteChoisie = $("input[name='rating']:checked").val() ; 
-                        console.log(noteChoisie);
-                        // TODO Empêcher le spam de clic pour ne pas trop faire d'updates
-                    });  // TODO MODIF NOTE en fonction du clic
-
+                    // Ajout du formulaire
+                    var wrapper = document.createElement('span');
+                    wrapper.innerHTML = formulaire;
                     div.appendChild(wrapper);
 
                     return div;
