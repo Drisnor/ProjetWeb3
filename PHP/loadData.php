@@ -13,16 +13,11 @@
 	$ecoles->execute();
 	$jeux->execute();
 
+    // Conversions des données en tableau
+    $ecoles = $ecoles->fetchAll();
+    $jeux = $jeux->fetchAll();
 
-	function coordsEcole($data) {
-		/* Traitement des données */
-		foreach($data as $row)
-		{
-		    echo $row["ecole"], " : ", $row["longitude"], $row["latitude"], "<br>";
-		}
-	}
-
-	/* ***************************************************************** */
-	/* main() */
-	coordsEcole($ecoles);
+    // Conversions des données en JSON
+    $ecoles = JSON_encode($ecoles);
+    $jeux = JSON_encode($jeux);
 ?>

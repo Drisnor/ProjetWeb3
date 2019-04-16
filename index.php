@@ -1,28 +1,3 @@
-<?php
-    /* **** Récupération des données **** */
-    // Connexion BD
-    include "PHP/connexionBD.inc.php";
-
-    $ecoles = $cnx->prepare("SELECT * FROM ecoles");
-    $jeux = $cnx->prepare("SELECT * FROM jeux");
-
-    // FETCH:ASSOC : format des résultats => tableau associatif
-    $ecoles->setFetchMode(PDO::FETCH_ASSOC);
-    $jeux->setFetchMode(PDO::FETCH_ASSOC);
-
-    // Récupération des données
-    $ecoles->execute();
-    $jeux->execute();
-
-    // Conversions des données en tableau
-    $ecoles = $ecoles->fetchAll();
-    $jeux = $jeux->fetchAll();
-
-    // Conversions des données en JSON
-    $ecoles = JSON_encode($ecoles);
-    $jeux = JSON_encode($jeux);
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -31,6 +6,9 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
+
+        <!-- Données de la BDD -->
+        <?php include 'PHP/loadData.php' ?>
 
         <style>
             .leaflet-popup-content {
@@ -49,7 +27,7 @@
         <script type="text/javascript">
             /********************* PARTIE FONCTIONS *********************/
             /* Affichage des marqueurs en fonction des données des écoles */
-            function donneesEcoles() {
+            function donneesEcoles(dataEcoles) {
                 for (var i = 0; i < dataEcoles.length; i++) {
                     L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
                      .bindPopup(dataEcoles[i].ecole)
@@ -60,7 +38,7 @@
             }
 
             /* Récupère et affecte les données des parcs dans des popups */
-            function donneesParcs() {
+            function donneesParcs(dataJeux) {
                 for (var i = 0; i < dataJeux.length; i++) {
                     var icone;
                     // Catégorie de parcs en fonction de la SUPERFICIE / nbJeux (différents icônes)
@@ -94,9 +72,12 @@
                     star = star.substr(0, decalage) + "checked" + star.substr(decalage);  // coche la bonne note
 
                     var formulaire = '<form id="popup-form" action="index.php" method="GET">'
-                        + '<label>Superficie : </label>' + dataJeux[i].superficie + ' m²'
-                        + '<input id="superficie" type="number" />'
                         + '<table class="popup-table">'
+                            + '<tr>'
+                                + '<label>Superficie : </label>' + dataJeux[i].superficie + ' m²'
+                                + '<input id="superficie" type="number"/>'
+                            + '</tr>'
+
                             + '<tr>'
                             +   '<th>Note:</th>'
                             +   '<td id="note">' + star + '</td>'
@@ -166,28 +147,17 @@
                 }
             });
 
-            var iconEcole = new LeafIcon({
-                iconUrl: 'https://i.postimg.cc/50XtqXKN/Icon-Ecole.png'
-            });
-
-            var parcVert = new LeafIcon({
-                iconUrl: 'https://i.postimg.cc/ZYf404TK/ParcV.png'
-            });
-            
-            var parcOrange = new LeafIcon({
-                iconUrl: 'https://i.postimg.cc/8cCGwnbS/ParcO.png'
-            });
-
-            var parcRouge = new LeafIcon({
-                iconUrl: 'https://i.postimg.cc/gjBW7qM6/ParcR.png'
-            });
+            var iconEcole  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/50XtqXKN/Icon-Ecole.png' });
+            var parcVert   = new LeafIcon({ iconUrl: 'https://i.postimg.cc/ZYf404TK/ParcV.png' });
+            var parcOrange = new LeafIcon({ iconUrl: 'https://i.postimg.cc/8cCGwnbS/ParcO.png' });
+            var parcRouge  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/gjBW7qM6/ParcR.png' });
 
             /* Données des écoles */
             var dataEcoles = <?php echo JSON_encode($ecoles); ?>;
             dataEcoles = JSON.parse(dataEcoles);
 
             var Ecoles = L.layerGroup();  // pour avoir le choix d'afficher les données dans le layer
-            donneesEcoles();
+            donneesEcoles(dataEcoles);  // données des popups pour les écoles
 
             /* Affichage des marqueurs en fonction de données */
             var dataJeux = <?php echo JSON_encode($jeux); ?>;
@@ -195,7 +165,7 @@
 
             /* Données pour les jeux */
             var Jeux = L.layerGroup(); 
-            donneesParcs();  // données des popups pour les parcs
+            donneesParcs(dataJeux);  // données des popups pour les parcs
 
             /* Choix de l'affichage des données */
             var overlays = { "Ecoles": Ecoles, "Jeux": Jeux }
