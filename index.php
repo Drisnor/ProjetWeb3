@@ -75,15 +75,15 @@
                         + '<table class="popup-table">'
                             + '<tr>'
                                 + '<label>Superficie : </label>' + dataJeux[i].superficie + ' m²'
-                                + '<input id="superficie" type="number"/>'
+                                + '<input id="superficie" name="superficie" type="number"/>'
                             + '</tr>'
 
                             + '<tr>'
                             +   '<th>Note:</th>'
-                            +   '<td id="note">' + star + '</td>'
+                            +   '<td id="note" name="note">' + star + '</td>'
                             + '</tr>'
                         + '</table>'
-                        + '<button id="btn" type="submit">Modifier</button>'
+                        + '<button id=\"'+ dataJeux[i].nom +'\" type="submit">Modifier</button>'
                         + '</form>';
 
                     /* Affichage des données des parcs dans les popups */
@@ -95,6 +95,13 @@
                     /* Ajout des infos sur la carte */
                     L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
                      .bindPopup(popup)
+                     .on("click", function (event) {  // écouteur sur les popups
+                            //var nomParc = dataJeux[i].nom;
+                            //var noteDefaut = dataJeux[i].note;
+                            // TODO Récupérer les infos des popups pour la requête
+                            alert(dataJeux[i].nom);
+                            console.log("nomParc : " + nomParc + "\nnoteDefaut : " + noteDefaut);
+                        })
                      .addTo(Jeux);
                 }
             }
@@ -105,15 +112,13 @@
                 var div = document.createElement("div");
                 var titre = document.createElement("h3");
                 titre.innerHTML = dataJeux[i].nom;
-                div.appendChild(titre);
 
-                /* Tableau pour présenter le formulaire de modification des données */
-                var node2 = document.createTextNode('Note : ');
-
-                // Ajout des éléments dans le DOM
                 // Ajout du formulaire
                 var wrapper = document.createElement('span');
                 wrapper.innerHTML = formulaire;
+
+                // Ajout des éléments dans le DOM
+                div.appendChild(titre);
                 div.appendChild(wrapper);
 
                 return div;
@@ -173,6 +178,25 @@
             /* Ajout du formulaire sur la carte */
             L.control.layers({},overlays).addTo(carte);
             Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
+
         </script>
+
+            <?php
+                // Récupération des données des popups
+                $superficie = $_GET['superficie']; 
+                $note = $_GET['rating'];
+                
+                /* TODO Récupère le nom du bouton submit pour la requête */
+
+
+                // Requête UPDATE pour la superficie
+                if(!empty($superficie)) {
+                  
+                } 
+
+                if(!empty($note)) {
+
+                }
+             ?>
     </body>
 </html>
