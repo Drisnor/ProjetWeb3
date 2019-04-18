@@ -135,13 +135,14 @@
 
                    $.ajax({
                     url: 'PHP/updateJeux.php',
-                    method: 'GET',
+                    type: 'GET',
                     data: {id: id, superficie: superficie, note:note},
                     success: function(data) {
-                        //modifications locales déhà effectuées
+                        return true;  //modifications locales déjà effectuées
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         console.log("Something went wrong");
+                        return false;
                     }
 
                    });
@@ -226,26 +227,5 @@
             Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
 
         </script>
-
-            <?php
-                // Récupération des données des popups
-                if(isset($superficie) && isset($note)) {
-                    $superficie = $_GET['superficie']; 
-                    $note = $_GET['rating'];
-                    
-                }
-
-                /* TODO Récupère le nom du bouton submit pour la requête */
-
-
-                // Requête UPDATE pour la superficie
-                if(!empty($superficie)) {
-                  
-                } 
-
-                if(!empty($note)) {
-
-                }
-             ?>
     </body>
 </html>
