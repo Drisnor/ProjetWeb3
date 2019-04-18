@@ -29,47 +29,34 @@
             /* Affichage des marqueurs en fonction des données des écoles */
             function donneesEcoles(dataEcoles) {
                 for (var i = 0; i < dataEcoles.length; i++) {
+                   var formulaireEcoles =
+                        '<table class="popup-table">'
+                            + '<tr>'
+                            +	 '<th>Adresse :</th>'
+							+	 '<td id="tel" name="	tel">' + dataEcoles[i].libelle + '</td>'
+                            + '</tr>'
+                            + '<tr>'
+                            +   '<th>Telephone :</th>'
+                            +   '<td id="tel" name="tel">' + dataEcoles[i].tel + '</td>'
+                            + '</tr>'
+                        + '</table>'
+                        + '</form>';
+						
+					var popup = L.popup().setContent(contenuEcoles(dataEcoles, i, formulaireEcoles));
+					
+					 var customOptions =
+					{
+						'minWidth': '300'
+					}
+		
                     L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
-                     .bindPopup(dataEcoles[i].ecole)
+                     .bindPopup(popup,customOptions)
                      .addTo(Ecoles);
-
                      /* TODO : Le clic sur une école détermine les 3 meilleurs parcs : note / DISTANCE */
                 }
             }
 
-            // écouteur sur les markers afin de faire des requêtes UPDATE (suite à une saisie dans la popup)
-            // TODO Juste SUR UNE POPUP quand on clique
-            function popupClic(event) {
-
-                console.log(this);
-
-                //dataJeux, i) {
-                var nomParc = dataJeux[i].nom;
-                var noteDefaut = dataJeux[i].note;
-
-                console.log(nomParc, noteDefaut);
-                /*<?php
-                    // Récupération des données des popups
-                    if(isset($superficie) && isset($note)) {
-                        $superficie = $_GET['superficie']; 
-                        $note = $_GET['rating'];
-                        
-                    }
-
-                    /* TODO Récupère le nom du bouton submit pour la requête */
-
-
-                    // Requête UPDATE pour la superficie
-                    if(!empty($superficie)) {
-                      
-                    } 
-
-                    if(!empty($note)) {
-
-                    }
-                ?>*/
-            }
-
+   
             /* Récupère et affecte les données des parcs dans des popups */
             function donneesParcs(dataJeux) {
                 for (var i = 0; i < dataJeux.length; i++) {
@@ -122,7 +109,7 @@
                     var popup = L.popup().setContent(contenu(dataJeux, i, formulaire));
 
                     /* Ajout des infos sur la carte */
-                    L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {draggable : true, icon : icone})
+                    L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
                      .bindPopup(popup)
                      .addTo(Jeux);
                 }
@@ -159,6 +146,22 @@
 
                    });
                 }  
+                // Ajout des éléments dans le DOM
+                div.appendChild(titre);
+                div.appendChild(wrapper);
+
+                return div;
+            }
+			
+			function contenuEcoles(dataJeux, i, formulaire) {
+                /* Création des éléments pour le DOM */
+                var div = document.createElement("div");
+                var titre = document.createElement("h3");
+                titre.innerHTML = dataJeux[i].ecole;
+
+                // Ajout du formulaire
+                var wrapper = document.createElement('span');
+                wrapper.innerHTML = formulaire;
 
                 // Ajout des éléments dans le DOM
                 div.appendChild(titre);
