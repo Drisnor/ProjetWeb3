@@ -37,6 +37,39 @@
                 }
             }
 
+            // écouteur sur les markers afin de faire des requêtes UPDATE (suite à une saisie dans la popup)
+            // TODO Juste SUR UNE POPUP quand on clique
+            function popupClic(event) {
+
+                console.log(this);
+
+                //dataJeux, i) {
+                var nomParc = dataJeux[i].nom;
+                var noteDefaut = dataJeux[i].note;
+
+                console.log(nomParc, noteDefaut);
+                /*<?php
+                    // Récupération des données des popups
+                    if(isset($superficie) && isset($note)) {
+                        $superficie = $_GET['superficie']; 
+                        $note = $_GET['rating'];
+                        
+                    }
+
+                    /* TODO Récupère le nom du bouton submit pour la requête */
+
+
+                    // Requête UPDATE pour la superficie
+                    if(!empty($superficie)) {
+                      
+                    } 
+
+                    if(!empty($note)) {
+
+                    }
+                ?>*/
+            }
+
             /* Récupère et affecte les données des parcs dans des popups */
             function donneesParcs(dataJeux) {
                 for (var i = 0; i < dataJeux.length; i++) {
@@ -71,37 +104,26 @@
                     var decalage = position+4;  // pour écrire juste avant la fin de l'input
                     star = star.substr(0, decalage) + "checked" + star.substr(decalage);  // coche la bonne note
 
-                    var formulaire = '<form id="popup-form" action="index.php" method="GET">'
-                        + '<table class="popup-table">'
+                    var formulaire ='<table class="popup-table">'
                             + '<tr>'
-                                + '<label>Superficie : </label>' + dataJeux[i].superficie + ' m²'
-                                + '<input id="superficie" name="superficie" type="number"/>'
+                                + '<input id="superficie" name="superficie" type="number"' + 'value="'+ dataJeux[i].superficie +'"/> m²'
                             + '</tr>'
 
                             + '<tr>'
                             +   '<th>Note:</th>'
-                            +   '<td id="note" name="note">' + star + '</td>'
+                            +   '<td id='+note+' name="note">' + star + '</td>'
                             + '</tr>'
                         + '</table>'
-                        + '<button id=\"'+ dataJeux[i].nom +'\" type="submit">Modifier</button>'
-                        + '</form>';
+                        + '<button data=\"'+ dataJeux[i].id +'\" type="submit">Modifier</button>'
+                        ;
 
                     /* Affichage des données des parcs dans les popups */
-                    // TODO Pouvoir modif les CHAMPS (+ notes)  => formulaire dans les popups ++ pour les écoles            
-                          
                     /* popup (onClick) qui affiche toutes les informations de chaque parc */
                     var popup = L.popup().setContent(contenu(dataJeux, i, formulaire));
 
                     /* Ajout des infos sur la carte */
-                    L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {icon : icone})
+                    L.marker([dataJeux[i].longitude, dataJeux[i].latitude], {draggable : true, icon : icone})
                      .bindPopup(popup)
-                     .on("click", function (event) {  // écouteur sur les popups
-                            //var nomParc = dataJeux[i].nom;
-                            //var noteDefaut = dataJeux[i].note;
-                            // TODO Récupérer les infos des popups pour la requête
-                            alert(dataJeux[i].nom);
-                            console.log("nomParc : " + nomParc + "\nnoteDefaut : " + noteDefaut);
-                        })
                      .addTo(Jeux);
                 }
             }
@@ -114,8 +136,29 @@
                 titre.innerHTML = dataJeux[i].nom;
 
                 // Ajout du formulaire
-                var wrapper = document.createElement('span');
+                var wrapper = document.createElement('form');
                 wrapper.innerHTML = formulaire;
+
+                wrapper.onsubmit = function(e){
+                    e.preventDefault();
+                    let id = $(e.srcElement).find('button').attr('data');
+                    let superficie = $(e.srcElement).find('#superficie').val();
+                    let note = $(e.srcElement).find('input[type=radio]:checked').val();
+                    console.log(superficie, note);
+
+                   $.ajax({
+                    url: 'PHP/updateJeux.php',
+                    method: 'GET',
+                    data: {id: id, superficie: superficie, note:note},
+                    success: function(data) {
+                        //modifications locales déhà effectuées
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log("Something went wrong");
+                    }
+
+                   });
+                }  
 
                 // Ajout des éléments dans le DOM
                 div.appendChild(titre);
@@ -183,9 +226,12 @@
 
             <?php
                 // Récupération des données des popups
-                $superficie = $_GET['superficie']; 
-                $note = $_GET['rating'];
-                
+                if(isset($superficie) && isset($note)) {
+                    $superficie = $_GET['superficie']; 
+                    $note = $_GET['rating'];
+                    
+                }
+
                 /* TODO Récupère le nom du bouton submit pour la requête */
 
 
