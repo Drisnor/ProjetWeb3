@@ -231,11 +231,13 @@
                 var coords = e.latlng;
                 var position = new L.latLng(coords.lat, coords.lng);
 
-                var plusProcheParc = L.GeometryUtil.closestLayer(carte, [Jeux], position); // => Parc le plus proche de l'école sélectionnée
-                    // TODO layersWithin() pour avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                var plusProcheParc = L.GeometryUtil.closestLayer(carte, [Jeux], position, 3);  // => Les 3 parcs les plus proches de l'école sélectionnée
+                    // TODO pour avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+
+                console.log(plusProcheParc);
                 var distance = plusProcheParc.distance;
-                var coords = plusProcheParc.latlng;
-                var marker = L.marker([coords.lat, coords.lng]).addTo(carte);
+                var coordsParc = plusProcheParc.latlng;
+                var marker = L.marker([coordsParc.lat, coordsParc.lng]).addTo(carte);
 
                 /* Récupère les données du parc le plus proche (superficie, note) */
                 var infos = $(plusProcheParc.layer._popup._content).prop('children');
@@ -243,7 +245,7 @@
                 var form = infos[1];
                 let superficie = $(form).find('#superficie').val();
                 let note = $(form).find('input[type=radio]:checked').val();
-                console.log("Nom du parc : ", nom, 'superficie', superficie);
+                console.log("nom ", nom, "superficie", superficie, "note", note);
             }            
 
         </script>
