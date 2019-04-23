@@ -253,9 +253,11 @@
                  *  Test : On prend le parc le plus proche du parc1
                  **/
                 // Recherche du 2ème parc le + proche (on exclu le 1er parc trouvé)
-                Jeux.removeLayer(parc1.layer._leaflet_id);  // supprime le 1er parc de la liste de recherche
+                var Jeux2 = Jeux;  // sauvegarde de tous les parcs
+                Jeux2.removeLayer(parc1.layer._leaflet_id);  // supprime le 1er parc de la liste de recherche
 
-                var parc2 = L.GeometryUtil.closestLayer(carte, [Jeux], pos1);  // => Le parc le plus proche du parc1
+                /* ITERATION 2 SANS LE PARC1 (car le parc le plus proche du parc1 est lui même) */
+                var parc2 = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée 
                 var pos2 = new L.latLng(parc2.latlng.lat, parc2.latlng.lng);
                 console.log("parc2", parc2);
                 
