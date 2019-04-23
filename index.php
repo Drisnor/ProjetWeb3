@@ -5,6 +5,7 @@
         <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.1/src/leaflet.geometryutil.min.js"></script>
+        <script src="leaflet-knn.min.js"></script>
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
 
@@ -23,7 +24,6 @@
     <body>
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
         <div id="macarte" style="width: auto; height: 800px;"></div>
-
         <!-- Affichage et traitement des données de la carte -->
         <script type="text/javascript">
             /*******************************************************************************************************/
@@ -229,23 +229,66 @@
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
             function clicEcole(e) {
                 var coords = e.latlng;
-                var position = new L.latLng(coords.lat, coords.lng);
+                var posEcole = new L.latLng(coords.lat, coords.lng);
 
-                var plusProcheParc = L.GeometryUtil.closestLayer(carte, [Jeux], position, 3);  // => Les 3 parcs les plus proches de l'école sélectionnée
-                    // TODO pour avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
-
-                console.log(plusProcheParc);
-                var distance = plusProcheParc.distance;
-                var coordsParc = plusProcheParc.latlng;
+                console.log("Jeux",Jeux);
+                var parc1 = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée
+                var pos1 = new L.latLng(parc1.latlng.lat, parc1.latlng.lng);
+                console.log("parc1", parc1);
+                
+                var distance = parc1.distance;  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                var coordsParc = parc1.latlng;
                 var marker = L.marker([coordsParc.lat, coordsParc.lng]).addTo(carte);
 
                 /* Récupère les données du parc le plus proche (superficie, note) */
-                var infos = $(plusProcheParc.layer._popup._content).prop('children');
+                var infos = $(parc1.layer._popup._content).prop('children');
                 var nom = infos[0].innerHTML;
                 var form = infos[1];
                 let superficie = $(form).find('#superficie').val();
                 let note = $(form).find('input[type=radio]:checked').val();
-                console.log("nom ", nom, "superficie", superficie, "note", note);
+
+                console.log("Parc 1 : nom ", nom, "superficie", superficie, "note", note);
+
+                /** Parc 2 le plus proche de l'école
+                 *  Test : On prend le parc le plus proche du parc1
+                 **/
+                // Recherche du 2ème parc le + proche (on exclu le 1er parc trouvé)
+                Jeux.removeLayer(parc1.layer._leaflet_id);  // supprime le 1er parc de la liste de recherche
+
+                var parc2 = L.GeometryUtil.closestLayer(carte, [Jeux], pos1);  // => Le parc le plus proche du parc1
+                var pos2 = new L.latLng(parc2.latlng.lat, parc2.latlng.lng);
+                console.log("parc2", parc2);
+                
+                distance = parc2.distance;  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                coordsParc = parc2.latlng;
+
+                var greenIcon = new L.Icon({
+                  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowSize: [41, 41]
+                });
+
+                var marker = L.marker([coordsParc.lat, coordsParc.lng], {icon: greenIcon} ).addTo(carte);
+
+                /* Récupère les données du parc le plus proche (superficie, note) */
+                infos = $(parc2.layer._popup._content).prop('children');
+                nom = infos[0].innerHTML;
+                form = infos[1];
+                superficie = $(form).find('#superficie').val();
+                note = $(form).find('input[type=radio]:checked').val();
+
+                console.log("Parc 1 : nom ", nom, "superficie", superficie, "note", note);                
+
+
+                /* leafletKnn a besoin de GeoJson ...
+                var j = L.geoJSON(Jeux.toGeoJSON());
+                console.log(j);
+                var index = leafletKnn(j);
+                console.log("leafletKnn", index.nearest([e.latlng.lat, e.latlng.lon], 3, 100)); */
+
             }            
 
         </script>
