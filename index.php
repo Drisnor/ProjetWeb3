@@ -4,6 +4,7 @@
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
         <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.1/src/leaflet.geometryutil.min.js"></script>
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
 
@@ -23,17 +24,75 @@
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
         <div id="macarte" style="width: auto; height: 800px;"></div>
 
-        <!-- Affichage de la carte -->
+        <!-- Affichage et traitement des données de la carte -->
         <script type="text/javascript">
-            /********************* PARTIE FONCTIONS *********************/
+            /*******************************************************************************************************/
+                            /******************************** Appels ********************************/
+            /*******************************************************************************************************/
+            var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse         
+                
+            /* Vue de la carte */
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 16,
+                minZoom: 12,
+                  layers: [
+                    Ecoles
+                  ]
+            }).addTo(carte);
+
+            // lien galerie d'images : https://postimg.cc/gallery/3891zxw0g/
+            /* Icone pour les écoles */
+            var LeafIcon = L.Icon.extend({
+                options: {
+                   iconSize:     [20, 20]
+                   /*,
+                   shadowSize:   [50, 64],
+                   iconAnchor:   [22, 94],
+                   shadowAnchor: [4, 62],
+                   popupAnchor:  [-3, -76]*/
+                }
+            });
+
+            var iconEcole  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/50XtqXKN/Icon-Ecole.png' });
+            var parcVert   = new LeafIcon({ iconUrl: 'https://i.postimg.cc/ZYf404TK/ParcV.png' });
+            var parcOrange = new LeafIcon({ iconUrl: 'https://i.postimg.cc/8cCGwnbS/ParcO.png' });
+            var parcRouge  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/gjBW7qM6/ParcR.png' });
+
+            /* Données des écoles */
+            var dataEcoles = <?php echo JSON_encode($ecoles); ?>;
+            dataEcoles = JSON.parse(dataEcoles);
+
+            var Ecoles = L.layerGroup();  // pour avoir le choix d'afficher les données dans le layer
+            donneesEcoles(dataEcoles);  // données des popups pour les écoles
+
+            /* Affichage des marqueurs en fonction de données */
+            var dataJeux = <?php echo JSON_encode($jeux); ?>;
+            dataJeux = JSON.parse(dataJeux);
+
+            /* Données pour les jeux */
+            var Jeux = L.layerGroup(); 
+            donneesParcs(dataJeux);  // données des popups pour les parcs
+
+            /* Choix de l'affichage des données */
+            var overlays = { "Ecoles": Ecoles, "Jeux": Jeux }
+
+            /* Ajout du formulaire sur la carte */
+            L.control.layers({},overlays).addTo(carte);
+            Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
+            Ecoles.addTo(carte);
+
+            /*******************************************************************************************************/
+                /******************************** PARTIE FONCTIONS ********************************/
+            /*******************************************************************************************************/            
             /* Affichage des marqueurs en fonction des données des écoles */
             function donneesEcoles(dataEcoles) {
                 for (var i = 0; i < dataEcoles.length; i++) {
                    var formulaireEcoles =
-                        '<table class="popup-table">'
+                        '<table class="popup-table' + dataEcoles[i].id + '">'
                             + '<tr>'
-                            +	 '<th>Adresse :</th>'
-							+	 '<td id="tel" name="	tel">' + dataEcoles[i].libelle + '</td>'
+                            +    '<th>Adresse :</th>'
+                            +    '<td id="adr" name="adr">' + dataEcoles[i].libelle + '</td>'
                             + '</tr>'
                             + '<tr>'
                             +   '<th>Telephone :</th>'
@@ -41,22 +100,18 @@
                             + '</tr>'
                         + '</table>'
                         + '</form>';
-						
-					var popup = L.popup().setContent(contenuEcoles(dataEcoles, i, formulaireEcoles));
-					
-					 var customOptions =
-					{
-						'minWidth': '300'
-					}
-		
+                        
+                    var popup = L.popup().setContent(contenuEcoles(dataEcoles, i, formulaireEcoles));
+                    
+                    var customOptions = {'minWidth': '300'};
                     L.marker([dataEcoles[i].longitude, dataEcoles[i].latitude], {icon: iconEcole})
                      .bindPopup(popup,customOptions)
+                     .on('click', clicEcole)  // traite le clic sur les écoles
                      .addTo(Ecoles);
-                     /* TODO : Le clic sur une école détermine les 3 meilleurs parcs : note / DISTANCE */
                 }
             }
 
-   
+
             /* Récupère et affecte les données des parcs dans des popups */
             function donneesParcs(dataJeux) {
                 for (var i = 0; i < dataJeux.length; i++) {
@@ -114,7 +169,7 @@
                      .addTo(Jeux);
                 }
             }
-            
+
             // Ajout du contenu dans chaque popup pour les parcs
             function contenu(dataJeux, i, formulaire) {
                 /* Création des éléments pour le DOM */
@@ -126,6 +181,7 @@
                 var wrapper = document.createElement('form');
                 wrapper.innerHTML = formulaire;
 
+                // Ecouteur sur les formulaires des parcs pour màj les données
                 wrapper.onsubmit = function(e){
                     e.preventDefault();
                     let id = $(e.srcElement).find('button').attr('data');
@@ -141,10 +197,9 @@
                         return true;  //modifications locales déjà effectuées
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        console.log("Something went wrong");
+                        alert("Données des parcs non mises à jour !");
                         return false;
                     }
-
                    });
                 }  
                 // Ajout des éléments dans le DOM
@@ -153,8 +208,8 @@
 
                 return div;
             }
-			
-			function contenuEcoles(dataJeux, i, formulaire) {
+
+            function contenuEcoles(dataJeux, i, formulaire) {
                 /* Création des éléments pour le DOM */
                 var div = document.createElement("div");
                 var titre = document.createElement("h3");
@@ -171,60 +226,25 @@
                 return div;
             }
 
-/*******************************************************************************************************/
-                /******************************** Appels ********************************/
-/*******************************************************************************************************/
-            var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse         
-                
-            /* Vue de la carte */
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 16,
-                minZoom: 12,
-                  layers: [
-                    Ecoles
-                  ]
-            }).addTo(carte);
-            
-            // lien galerie d'images : https://postimg.cc/gallery/3891zxw0g/
-            /* Icone pour les écoles */
-            var LeafIcon = L.Icon.extend({
-                options: {
-                   iconSize:     [20, 20]
-                   /*,
-                   shadowSize:   [50, 64],
-                   iconAnchor:   [22, 94],
-                   shadowAnchor: [4, 62],
-                   popupAnchor:  [-3, -76]*/
-                }
-            });
+            /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
+            function clicEcole(e) {
+                var coords = e.latlng;
+                var position = new L.latLng(coords.lat, coords.lng);
 
-            var iconEcole  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/50XtqXKN/Icon-Ecole.png' });
-            var parcVert   = new LeafIcon({ iconUrl: 'https://i.postimg.cc/ZYf404TK/ParcV.png' });
-            var parcOrange = new LeafIcon({ iconUrl: 'https://i.postimg.cc/8cCGwnbS/ParcO.png' });
-            var parcRouge  = new LeafIcon({ iconUrl: 'https://i.postimg.cc/gjBW7qM6/ParcR.png' });
+                var plusProcheParc = L.GeometryUtil.closestLayer(carte, [Jeux], position); // => Parc le plus proche de l'école sélectionnée
+                    // TODO layersWithin() pour avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                var distance = plusProcheParc.distance;
+                var coords = plusProcheParc.latlng;
+                var marker = L.marker([coords.lat, coords.lng]).addTo(carte);
 
-            /* Données des écoles */
-            var dataEcoles = <?php echo JSON_encode($ecoles); ?>;
-            dataEcoles = JSON.parse(dataEcoles);
-
-            var Ecoles = L.layerGroup();  // pour avoir le choix d'afficher les données dans le layer
-            donneesEcoles(dataEcoles);  // données des popups pour les écoles
-
-            /* Affichage des marqueurs en fonction de données */
-            var dataJeux = <?php echo JSON_encode($jeux); ?>;
-            dataJeux = JSON.parse(dataJeux);
-
-            /* Données pour les jeux */
-            var Jeux = L.layerGroup(); 
-            donneesParcs(dataJeux);  // données des popups pour les parcs
-
-            /* Choix de l'affichage des données */
-            var overlays = { "Ecoles": Ecoles, "Jeux": Jeux }
-
-            /* Ajout du formulaire sur la carte */
-            L.control.layers({},overlays).addTo(carte);
-            Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
+                /* Récupère les données du parc le plus proche (superficie, note) */
+                var infos = $(plusProcheParc.layer._popup._content).prop('children');
+                var nom = infos[0].innerHTML;
+                var form = infos[1];
+                let superficie = $(form).find('#superficie').val();
+                let note = $(form).find('input[type=radio]:checked').val();
+                console.log("Nom du parc : ", nom, 'superficie', superficie);
+            }            
 
         </script>
     </body>
