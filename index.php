@@ -226,10 +226,19 @@
                 return div;
             }
 
+            /* Affiche le nom, la superficie et la note d'un parc (en fonction d'un layer de parc) */
+            function getParcInfos(parc) {
+                    var infos = $(parc.layer._popup._content).prop('children');
+                    var nom = infos[0].innerHTML;
+                    var form = infos[1];
+                    let superficie = $(form).find('#superficie').val();
+                    let note = $(form).find('input[type=radio]:checked').val();
+                    console.log("Parc : nom ", nom, "superficie", superficie, "note", note);
+                    // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+            } 
+
             /* Trouve les n parcs les plus proches d'une école sélectionnée */
-            function parcsProches(posEcole, parc, n) {
-                var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
-                
+            function nParcsProches(posEcole, parc, n) {
                 // Recherche du parc1
                 if (parc == null) { 
                     parc = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée
@@ -239,18 +248,11 @@
                                     .bindPopup("" + 0)
                                     .addTo(carte);
                     // TODO : Supprimer les marqueurs quand on change d'école (var globale avec le nom de l'école sélectionnée et CHEKC == au e.nom(event onClick))
-
-                    /* Récupère les données du parc (courant) le plus proche (superficie, note) */
-                    var infos = $(parc.layer._popup._content).prop('children');
-                    var nom = infos[0].innerHTML;
-                    var form = infos[1];
-                    let superficie = $(form).find('#superficie').val();
-                    let note = $(form).find('input[type=radio]:checked').val();
-                    console.log("Parc 0 : nom ", nom, "superficie", superficie, "note", note);
-
-                    /* recherche d'autres parcs */
-                    parcsProches(posEcole, parc, n);
+                    
+                    getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
+                    nParcsProches(posEcole, parc, n);  /* recherche d'autres parcs */
                 } else { 
+                    var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
                     parcs.push(parc);  // on garde le 1er parc trouvé
 
                     // On recherche d'autres parcs proches, en supprimant toujours les parcs trouvés précedemment                   
@@ -262,18 +264,9 @@
                                         .bindPopup("" + i)
                                         .addTo(carte);
 
-                        var infos = $(parc.layer._popup._content).prop('children');
-                        var nom = infos[0].innerHTML;
-                        var form = infos[1];
-                        let superficie = $(form).find('#superficie').val();
-                        let note = $(form).find('input[type=radio]:checked').val();
-                        console.log("Parc", i," : nom ", nom, "superficie", superficie, "note", note);
-
-                        parcs.push(parc);
-                        console.log("push"+i, parcs)
-                        
+                        getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
+                        parcs.push(parc);  // on garde les autres parcs trouvés
                         carte.addLayer(parcs[i-1].layer);  // on remet le l'ancien parc (gardé dans parcs) sur la carte
-                        //parcs.push(parc);
                     }
 
                     console.log("parcs = ", parcs);
@@ -286,8 +279,9 @@
                 var coords = e.latlng;
                 var posEcole = new L.latLng(coords.lat, coords.lng);
 
-                var listeParcs = parcsProches(posEcole, null, 3); // les 3 parcs les plus proches
-                console.log("Parcs trouvés : ", listeParcs);
+                var n = 3;  // les 3 parcs les plus proches
+                var listeParcs = nParcsProches(posEcole, null, n);
+                console.log("Parcs trouvés : " + listeParcs);
             }            
 
         </script>
