@@ -226,15 +226,12 @@
                 return div;
             }
 
-            /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
-            function clicEcole(e) {
-                var coords = e.latlng;
-                var posEcole = new L.latLng(coords.lat, coords.lng);
-
-                console.log("Jeux",Jeux);
+            /* Trouve les 3 parcs les plus proches d'une école sélectionnée */
+            function parcsProches(posEcole) {
                 var parc1 = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée
                 var pos1 = new L.latLng(parc1.latlng.lat, parc1.latlng.lng);
                 console.log("parc1", parc1);
+                console.log("Jeux",Jeux);
                 
                 var distance = parc1.distance;  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
                 var coordsParc = parc1.latlng;
@@ -246,18 +243,29 @@
                 var form = infos[1];
                 let superficie = $(form).find('#superficie').val();
                 let note = $(form).find('input[type=radio]:checked').val();
-
                 console.log("Parc 1 : nom ", nom, "superficie", superficie, "note", note);
 
                 /** Parc 2 le plus proche de l'école
                  *  Test : On prend le parc le plus proche du parc1
                  **/
-                // Recherche du 2ème parc le + proche (on exclu le 1er parc trouvé)
-                var Jeux2 = Jeux;  // sauvegarde de tous les parcs
-                Jeux2.removeLayer(parc1.layer._leaflet_id);  // supprime le 1er parc de la liste de recherche
 
-                /* ITERATION 2 SANS LE PARC1 (car le parc le plus proche du parc1 est lui même) */
+                /*TODO : TROUVER une MEILLEURE METHODE pour trouver les 2 autres parcs
+                    var parcs = L.GeometryUtil.nClosestLayers(carte, [Jeux], posEcole, 3);
+                    console.log("parcs", parcs);
+                **** OU leafletKnn a besoin de GeoJson ...
+                    var j = L.geoJSON(Jeux.toGeoJSON());
+                    console.log(j);
+                    var index = leafletKnn(j);
+                    console.log("leafletKnn", index.nearest([e.latlng.lat, e.latlng.lon], 3, 100)); */
+
+                // Recherche du 2ème parc le + proche (on exclu le 1er parc trouvé)
+                //var Jeux2 = L.layerGroup(Jeux);  // TODO : Deep copy pour ne pas perdre le parc1 sur la map
+                Jeux.removeLayer(parc1.layer._leaflet_id);  // supprime le 1er parc de la liste de recherche
+
+                // ITERATION 2 SANS LE PARC1 (car le parc le plus proche du parc1 est lui même)
                 var parc2 = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée 
+                carte.addLayer(parc1.layer);  // on remet le parc1 sur la map
+
                 var pos2 = new L.latLng(parc2.latlng.lat, parc2.latlng.lng);
                 console.log("parc2", parc2);
                 
@@ -275,22 +283,50 @@
 
                 var marker = L.marker([coordsParc.lat, coordsParc.lng], {icon: greenIcon} ).addTo(carte);
 
-                /* Récupère les données du parc le plus proche (superficie, note) */
+                // Récupère les données du parc le plus proche (superficie, note)
                 infos = $(parc2.layer._popup._content).prop('children');
                 nom = infos[0].innerHTML;
                 form = infos[1];
                 superficie = $(form).find('#superficie').val();
                 note = $(form).find('input[type=radio]:checked').val();
+                console.log("Parc 2 : nom ", nom, "superficie", superficie, "note", note);           
 
-                console.log("Parc 1 : nom ", nom, "superficie", superficie, "note", note);                
+                /* parc3 : le + proche du parc2 */
+                var orangeIcon = new L.Icon({
+                  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowSize: [41, 41]
+                });
 
+                Jeux.removeLayer(parc2.layer._leaflet_id); // supprime le parc2 de la liste de recherche
+                var parc3 = L.GeometryUtil.closestLayer(carte, [Jeux], pos2);  // => Le parc le plus proche de l'école sélectionnée 
+                carte.addLayer(parc2.layer);  // on remet le parc2 sur la map
 
-                /* leafletKnn a besoin de GeoJson ...
-                var j = L.geoJSON(Jeux.toGeoJSON());
-                console.log(j);
-                var index = leafletKnn(j);
-                console.log("leafletKnn", index.nearest([e.latlng.lat, e.latlng.lon], 3, 100)); */
+                console.log("parc3", parc3);
+                distance = parc3.distance;  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                coordsParc = parc3.latlng;
 
+                var marker = L.marker([coordsParc.lat, coordsParc.lng], {icon: orangeIcon} ).addTo(carte);
+
+                // Récupère les données du parc le plus proche (superficie, note)
+                infos = $(parc3.layer._popup._content).prop('children');
+                nom = infos[0].innerHTML;
+                form = infos[1];
+                superficie = $(form).find('#superficie').val();
+                note = $(form).find('input[type=radio]:checked').val();
+                console.log("Parc 3 : nom ", nom, "superficie", superficie, "note", note);                
+
+            }
+
+            /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
+            function clicEcole(e) {
+                var coords = e.latlng;
+                var posEcole = new L.latLng(coords.lat, coords.lng);
+
+                parcsProches(posEcole);
             }            
 
         </script>
