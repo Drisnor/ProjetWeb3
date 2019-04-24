@@ -99,6 +99,7 @@
                             +   '<td id="tel" name="tel">' + dataEcoles[i].tel + '</td>'
                             + '</tr>'
                         + '</table>'
+                        + '<button class="ecole" type="submit"> Supprimer marqueurs </button>'
                         + '</form>';
                         
                     var popup = L.popup().setContent(contenuEcoles(dataEcoles, i, formulaireEcoles));
@@ -148,12 +149,12 @@
 
                     var formulaire ='<table class="popup-table">'
                             + '<tr>'
-                                + '<input id="superficie" name="superficie" type="number"' + 'value="'+ dataJeux[i].superficie +'"/> m²'
+                                + '<input class="superficie" name="superficie" type="number"' + 'value="'+ dataJeux[i].superficie +'"/> m²'
                             + '</tr>'
 
                             + '<tr>'
                             +   '<th>Note:</th>'
-                            +   '<td id='+note+' name="note">' + star + '</td>'
+                            +   '<td class='+note+' name="note">' + star + '</td>'
                             + '</tr>'
                         + '</table>'
                         + '<button data=\"'+ dataJeux[i].id +'\" type="submit">Modifier</button>'
@@ -209,15 +210,19 @@
                 return div;
             }
 
-            function contenuEcoles(dataJeux, i, formulaire) {
+            function contenuEcoles(dataEcoles, i, formulaire) {
                 /* Création des éléments pour le DOM */
                 var div = document.createElement("div");
                 var titre = document.createElement("h3");
-                titre.innerHTML = dataJeux[i].ecole;
+                titre.innerHTML = dataEcoles[i].ecole;
 
                 // Ajout du formulaire
-                var wrapper = document.createElement('span');
+                var wrapper = document.createElement('form');
                 wrapper.innerHTML = formulaire;
+
+                wrapper.onsubmit = function(e){
+                    e.preventDefault();
+                }
 
                 // Ajout des éléments dans le DOM
                 div.appendChild(titre);
@@ -238,7 +243,8 @@
 
             /* Trouve les n parcs les plus proches d'une école sélectionnée */
             function nParcsProches(posEcole, parc, n) {
-                //console.log("id1", idEcole);
+                var markers = [];  // liste de tous les markers des parcs proches
+                var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
 
                 // Recherche du parc1
                 if (parc == null) { 
@@ -248,15 +254,12 @@
                     var marker = L.marker([coordsParc.lat, coordsParc.lng])
                                     .bindPopup("" + 0)
                                     .addTo(carte);
-                    // TODO : Supprimer les marqueurs quand on change d'école (var globale avec le nom de l'école sélectionnée et CHEKC == au e.nom(event onClick))
-                    
+                    markers.push(marker);
+                    parcs.push(parc);  // on garde le 1er parc trouvé
                     getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
                 }
 
                 /* recherche d'autres parcs */
-                var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
-                parcs.push(parc);  // on garde le 1er parc trouvé
-
                 // On recherche d'autres parcs proches, en supprimant toujours les parcs trouvés précedemment                   
                 for(var i = 1 ; i < n ; i++) {
                     Jeux.removeLayer(parc.layer._leaflet_id); // supprime le parc précédent de la liste de recherche
@@ -265,6 +268,7 @@
                     var marker = L.marker([coordsParc.lat, coordsParc.lng])
                                     .bindPopup("" + i)
                                     .addTo(carte);
+                    markers.push(marker);
 
                     getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
                     parcs.push(parc);  // on garde les autres parcs trouvés
@@ -276,6 +280,16 @@
                     Jeux.addLayer(parcs[j].layer);
                 }
 
+                /* Ecouteur sur les boutons "supprimer" des écoles */
+                $('.ecole').click(function() {
+                    console.log("COUCOU");
+                    // On supprime les anciens marqueurs 
+                    for ( var j = 0 ; j < markers.length ; j++) {
+                        carte.removeLayer(markers[j]);
+                    } 
+                });
+                
+                
                 console.log("Parcs trouvés : ", parcs);  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
             }
 
@@ -285,7 +299,7 @@
                 var coords = e.latlng;
                 var posEcole = new L.latLng(coords.lat, coords.lng);
 
-                var n = 3;  // les 3 parcs les plus proches
+                var n = 5;  // les n parcs les plus proches
                 nParcsProches(posEcole, null, n);
             }            
 
