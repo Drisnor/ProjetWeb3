@@ -318,19 +318,23 @@
 			function Stats(){
 				var effectifs = [];
 				var nomEffectifs = [];
-				effectifMAX = dataEcoles[0].effectif;
-				nomEffectifMAX = dataEcoles[0].ecole;
+				effectifMAX = 0;
+				nomEffectifMAX = "";
+				console.log("effectifMAX", effectifMAX, nomEffectifMAX);
 				for(var i = 0; i < 10; i++){
-					for(var x = 1; x < dataEcoles.length; x++){
-						if ((dataEcoles[x].effectif > effectifMAX) && (nomEffectifs.indexOf("'"+dataEcoles[x].ecole+"'")=="-1")){
-								console.log(effectifs.indexOf("'"+dataEcoles[x].effectif+"'"));
-								effectifMAX = dataEcoles[x].effectif;
-								nomEffectifMAX = dataEcoles[x].ecole;
-								console.log(effectifMAX);
-						}						
+					console.log("i",dataEcoles[i].ecole);
+					console.log("dataEcoles", dataEcoles);
+
+					for(var x = 0; x < dataEcoles.length; x++){
+
+						if ((dataEcoles[x].effectif > effectifMAX) && (nomEffectifs.indexOf("'"+dataEcoles[x].ecole+"'") == -1)){
+							effectifMAX = dataEcoles[x].effectif;
+							nomEffectifMAX = dataEcoles[x].ecole;
+							
+							effectifs.push(effectifMAX);
+							nomEffectifs.push(nomEffectifMAX);
+						}				
 					}	
-				effectifs.push(effectifMAX);
-				nomEffectifs.push(nomEffectifMAX);
 				}
 				console.log(effectifs);
 				console.log(dataEcoles.length);
@@ -352,6 +356,7 @@
 					}
 				});
 			}
+
 			Stats();
         </script>
     </body>

@@ -2,7 +2,7 @@
 	// Connexion BD
 	include "connexionBD.inc.php";
 
-	$ecoles = $cnx->prepare("SELECT * FROM ecoles");
+	$ecoles = $cnx->prepare("SELECT * FROM ecoles ORDER BY effectif ASC");
 	$jeux = $cnx->prepare("SELECT * FROM jeux");
 
 	// FETCH:ASSOC : format des résultats => tableau associatif
