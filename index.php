@@ -317,27 +317,11 @@
 
 			function Stats(){
 				var effectifs = [];
-				var nomEffectifs = [];
-				effectifMAX = 0;
-				nomEffectifMAX = "";
-				console.log("effectifMAX", effectifMAX, nomEffectifMAX);
-				for(var i = 0; i < 10; i++){
-					console.log("i",dataEcoles[i].ecole);
-					console.log("dataEcoles", dataEcoles);
-
-					for(var x = 0; x < dataEcoles.length; x++){
-
-						if ((dataEcoles[x].effectif > effectifMAX) && (nomEffectifs.indexOf("'"+dataEcoles[x].ecole+"'") == -1)){
-							effectifMAX = dataEcoles[x].effectif;
-							nomEffectifMAX = dataEcoles[x].ecole;
-							
-							effectifs.push(effectifMAX);
-							nomEffectifs.push(nomEffectifMAX);
-						}				
-					}	
+				var nomEffectifs = [];	
+				for(var i = dataEcoles.length-1; i > dataEcoles.length-11 ; i--){
+					effectifs.push(dataEcoles[i].effectif);
+					nomEffectifs.push(dataEcoles[i].ecole);
 				}
-				console.log(effectifs);
-				console.log(dataEcoles.length);
 				new Chart(document.getElementById("pie-chart"),{
 					type : 'pie',
 					data: {
