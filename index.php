@@ -6,6 +6,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.1/src/leaflet.geometryutil.min.js"></script>
         <script src="leaflet-knn.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <title>Projet Web3</title>
 
@@ -22,8 +23,11 @@
     </head>
 
     <body>
+
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
-        <div id="macarte" style="width: auto; height: 800px;"></div>
+        <div id="macarte" style="width: 80%; height: 600px;"></div>
+		
+		<canvas id="pie-chart" width="800" height="450"></canvas>
         <!-- Affichage et traitement des données de la carte -->
         <script type="text/javascript">
             /*******************************************************************************************************/
@@ -81,7 +85,6 @@
             L.control.layers({},overlays).addTo(carte);
             Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
             Ecoles.addTo(carte);
-
             /*******************************************************************************************************/
                 /******************************** PARTIE FONCTIONS ********************************/
             /*******************************************************************************************************/            
@@ -301,8 +304,55 @@
 
                 var n = 5;  // les n parcs les plus proches
                 nParcsProches(posEcole, null, n);
-            }            
+            }    
+			
+			function getRandomColor() {
+				var letters = '0123456789ABCDEF';
+				var color = '#';
+				for (var i = 0; i < 6; i++) {
+					color += letters[Math.floor(Math.random() * 16)];
+				}
+				return color;
+			}
 
+			function Stats(){
+				var effectifs = [];
+				var nomEffectifs = [];
+				effectifMAX = dataEcoles[0].effectif;
+				nomEffectifMAX = dataEcoles[0].ecole;
+				for(var i = 0; i < 10; i++){
+					for(var x = 1; x < dataEcoles.length; x++){
+						if ((dataEcoles[x].effectif > effectifMAX) && (nomEffectifs.indexOf("'"+dataEcoles[x].ecole+"'")=="-1")){
+								console.log(effectifs.indexOf("'"+dataEcoles[x].effectif+"'"));
+								effectifMAX = dataEcoles[x].effectif;
+								nomEffectifMAX = dataEcoles[x].ecole;
+								console.log(effectifMAX);
+						}						
+					}	
+				effectifs.push(effectifMAX);
+				nomEffectifs.push(nomEffectifMAX);
+				}
+				console.log(effectifs);
+				console.log(dataEcoles.length);
+				new Chart(document.getElementById("pie-chart"),{
+					type : 'pie',
+					data: {
+						labels: nomEffectifs,
+						datasets: [{
+							label: "Test",
+							backgroundColor: [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+							data: effectifs
+						}]
+					},
+					options: {
+						title: {
+							display: true,
+							text: 'Effectif des dix plus grandes écoles Toulousaines'
+						}
+					}
+				});
+			}
+			Stats();
         </script>
     </body>
 </html>
