@@ -48,7 +48,7 @@
             /* Vue de la carte */
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 16,
+                maxZoom: 19,
                 minZoom: 12,
                   layers: [
                     Ecoles
@@ -311,6 +311,17 @@
                     // on ne supprime pas les meilleurs parcs CAR on ne modifie pas la liste des parcs
                     // !! TODO : Actualiser l'ordre des parcs dans la liste si on change la note entre temps ! 
                 });
+
+                // Tri des meilleurs parcs par note :  TODO hashmap(nomEcole, note) triée
+                // TODO Visualisation graphique : 5 = vert, 4 = orange ... sur les marqueurs des parcs
+                $(function(){
+                	var idEcole = $(popupEcole).prop('id');
+				    var elems = $('#' + idEcole).children('li').remove();
+				    elems.sort(function(a,b){
+				        return parseInt(a.id) < parseInt(b.id);
+				    });
+				    $('#' + idEcole).append(elems);
+				});
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
