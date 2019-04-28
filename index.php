@@ -16,9 +16,19 @@
         <style>
             .leaflet-popup-content {
                 width: 200px;
-                height: 150px;
+                height: 300px;
                 /*overflow-y: scroll; (scrollbar) */
             }
+
+            /* Supprime les espaces entre les <li> */
+            ul {
+				padding: 0;
+        		list-style: none;
+			}
+
+		    ul li {
+		        display: inline-block;
+    		}
         </style>
     </head>
 
@@ -92,7 +102,7 @@
             function donneesEcoles(dataEcoles) {
                 for (var i = 0; i < dataEcoles.length; i++) {
                    var formulaireEcoles =
-                        '<table class="popup-table' + dataEcoles[i].id + '">'
+                        '<table class="popup-table">'
                             + '<tr>'
                             +    '<th>Adresse :</th>'
                             +    '<td id="adr" name="adr">' + dataEcoles[i].libelle + '</td>'
@@ -103,7 +113,9 @@
                             + '</tr>'
                         + '</table>'
                         + '<button class="ecole" type="submit"> Supprimer marqueurs </button>'
-                        + '</form>';
+                        + '</form>'
+                        + '<h3> Meilleurs parcs proches : </h3>'
+                        + '<ul name="parcs" id="' + dataEcoles[i].id +'">';
                         
                     var popup = L.popup().setContent(contenuEcoles(dataEcoles, i, formulaireEcoles));
                     
@@ -189,7 +201,7 @@
                 wrapper.onsubmit = function(e){
                     e.preventDefault();
                     let id = $(e.srcElement).find('button').attr('data');
-                    let superficie = $(e.srcElement).find('#superficie').val();
+                    let superficie = $(e.srcElement).find('.superficie').val();
                     let note = $(e.srcElement).find('input[type=radio]:checked').val();
                     console.log(superficie, note);
 
@@ -234,18 +246,25 @@
                 return div;
             }
 
-            /* Affiche le nom, la superficie et la note d'un parc (en fonction d'un layer de parc) */
-            function getParcInfos(parc) {
-                    var infos = $(parc.layer._popup._content).prop('children');
-                    var nom = infos[0].innerHTML;
-                    var form = infos[1];
-                    let superficie = $(form).find('#superficie').val();
-                    let note = $(form).find('input[type=radio]:checked').val();
-                    console.log("Parc : nom ", nom, "superficie", superficie, "note", note);
-            } 
+            /* Affiche le nom, la superficie et la note d'un parc dans la popup de l'école la plus proche */
+            function getParcInfos(parc, popupEcole) {
+                var infos = $(parc.layer._popup._content).prop('children');
+                var nom = infos[0].innerHTML;
+                var form = infos[1];
+                let superficie = $(form).find('.superficie').val();
+                let note = $(form).find('input[type=radio]:checked').val();
+                console.log("Parc : nom ", nom, "superficie", superficie, "note", note);
 
-            /* Trouve les n parcs les plus proches d'une école sélectionnée */
-            function nParcsProches(posEcole, parc, n) {
+                /* TODO  ACTUALISER Si on a pas encore mis les meilleurs parcs pour l'école choisie */
+                //if( $(popupEcole).html() == "" ) {
+                	$(popupEcole).append('<li id="' + note + '" > nom : ' + nom + " superficie : " + superficie + " note : " + note + "</li>");
+                //}
+            }
+
+            /* Trouve les n parcs les plus proches d'une école sélectionnée 
+               A chaque clic sur une école on affiche la liste des parcs proches classés par notes (dans la popup de l'école)
+             */
+            function nParcsProches(popupEcole, posEcole, parc, n) {
                 var markers = [];  // liste de tous les markers des parcs proches
                 var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
 
@@ -259,7 +278,7 @@
                                     .addTo(carte);
                     markers.push(marker);
                     parcs.push(parc);  // on garde le 1er parc trouvé
-                    getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
+                    getParcInfos(parc, popupEcole); /* Affiche le parc dans la popup de l'école la plus proche */
                 }
 
                 /* recherche d'autres parcs */
@@ -273,7 +292,7 @@
                                     .addTo(carte);
                     markers.push(marker);
 
-                    getParcInfos(parc); /* Récupère les données du parc (courant) le plus proche (superficie, note) */
+                    getParcInfos(parc, popupEcole); /* Affiche le parc dans la popup de l'école la plus proche */
                     parcs.push(parc);  // on garde les autres parcs trouvés
                     carte.addLayer(parcs[i-1].layer);  // on remet le l'ancien parc (gardé dans parcs) sur la carte
                 }
@@ -285,27 +304,27 @@
 
                 /* Ecouteur sur les boutons "supprimer" des écoles */
                 $('.ecole').click(function() {
-                    console.log("COUCOU");
                     // On supprime les anciens marqueurs 
                     for ( var j = 0 ; j < markers.length ; j++) {
                         carte.removeLayer(markers[j]);
-                    } 
+                    }
+                    // on ne supprime pas les meilleurs parcs CAR on ne modifie pas la liste des parcs
+                    // !! TODO : Actualiser l'ordre des parcs dans la liste si on change la note entre temps ! 
                 });
-                
-                
-                console.log("Parcs trouvés : ", parcs);  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
             function clicEcole(e) {
-                var id = e.target._leaflet_id;
                 var coords = e.latlng;
                 var posEcole = new L.latLng(coords.lat, coords.lng);
 
                 var n = 5;  // les n parcs les plus proches
-                nParcsProches(posEcole, null, n);
+            	var popupEcole = $(e.target._popup._content).find('ul');
+                nParcsProches(popupEcole, posEcole, null, n);
             }    
 			
+
+			/************************ PARTIE STATS ************************/
 			function getRandomColor() {
 				var letters = '0123456789ABCDEF';
 				var color = '#';
