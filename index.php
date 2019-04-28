@@ -247,7 +247,7 @@
             }
 
             /* Affiche le nom, la superficie et la note d'un parc dans la popup de l'école la plus proche */
-            function getParcInfos(parc, popupEcole) {
+            function getParcInfos(parc, popupEcole, n) {
                 var infos = $(parc.layer._popup._content).prop('children');
                 var nom = infos[0].innerHTML;
                 var form = infos[1];
@@ -255,10 +255,11 @@
                 let note = $(form).find('input[type=radio]:checked').val();
                 console.log("Parc : nom ", nom, "superficie", superficie, "note", note);
 
-                /* TODO  ACTUALISER Si on a pas encore mis les meilleurs parcs pour l'école choisie */
-                //if( $(popupEcole).html() == "" ) {
+                /* Si on a pas encore mis tous les meilleurs parcs pour l'école choisie */
+                if( $(popupEcole)[0].childElementCount < n ) {
                 	$(popupEcole).append('<li id="' + note + '" > nom : ' + nom + " superficie : " + superficie + " note : " + note + "</li>");
-                //}
+                } 
+                // !! TODO  ACTUALISER si on change la note
             }
 
             /* Trouve les n parcs les plus proches d'une école sélectionnée 
@@ -278,7 +279,7 @@
                                     .addTo(carte);
                     markers.push(marker);
                     parcs.push(parc);  // on garde le 1er parc trouvé
-                    getParcInfos(parc, popupEcole); /* Affiche le parc dans la popup de l'école la plus proche */
+                    getParcInfos(parc, popupEcole, n); /* Affiche le parc dans la popup de l'école la plus proche */
                 }
 
                 /* recherche d'autres parcs */
@@ -292,7 +293,7 @@
                                     .addTo(carte);
                     markers.push(marker);
 
-                    getParcInfos(parc, popupEcole); /* Affiche le parc dans la popup de l'école la plus proche */
+                    getParcInfos(parc, popupEcole, n); /* Affiche le parc dans la popup de l'école la plus proche */
                     parcs.push(parc);  // on garde les autres parcs trouvés
                     carte.addLayer(parcs[i-1].layer);  // on remet le l'ancien parc (gardé dans parcs) sur la carte
                 }
