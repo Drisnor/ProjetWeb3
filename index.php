@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/leaflet-geometryutil@0.9.1/src/leaflet.geometryutil.min.js"></script>
-        <script src="leaflet-knn.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+        <link rel="stylesheet" href="includes/leaflet.css" />
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
-        <title>Projet Web3</title>
 
+        <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+        <script type="text/javascript" src="includes/jquery.min.js"></script>
+        <script type="text/javascript" src="includes/leaflet.geometryutil.min.js"></script>
+        <script type="text/javascript" src="includes/Chart.min.js"></script>
+        
+        <title>Projet Web3</title>
         <!-- Données de la BDD -->
         <?php include 'PHP/loadData.php' ?>
 
@@ -22,13 +22,13 @@
 
             /* Supprime les espaces entre les <li> */
             ul {
-				padding: 0;
-        		list-style: none;
-			}
+                padding: 0;
+                list-style: none;
+            }
 
-		    ul li {
-		        display: inline-block;
-    		}
+            ul li {
+                display: inline-block;
+            }
         </style>
     </head>
 
@@ -36,12 +36,12 @@
 
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
         <div id="macarte" style="width: 80%; height: 600px;"></div>
-		
-		<canvas id="pie-chart" width="800" height="450"></canvas>
+        
+        <canvas id="pie-chart" width="800" height="450"></canvas>
         <!-- Affichage et traitement des données de la carte -->
         <script type="text/javascript">
             /*******************************************************************************************************/
-                            /******************************** Appels ********************************/
+                     /******************************** Carte et marqueurs ********************************/
             /*******************************************************************************************************/
             var carte = L.map('macarte').setView([43.6043 , 1.4437], 12);  // zoom sur Toulouse         
                 
@@ -60,11 +60,6 @@
             var LeafIcon = L.Icon.extend({
                 options: {
                    iconSize:     [20, 20]
-                   /*,
-                   shadowSize:   [50, 64],
-                   iconAnchor:   [22, 94],
-                   shadowAnchor: [4, 62],
-                   popupAnchor:  [-3, -76]*/
                 }
             });
 
@@ -96,7 +91,7 @@
             Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
             Ecoles.addTo(carte);
             /*******************************************************************************************************/
-                /******************************** PARTIE FONCTIONS ********************************/
+                    /******************************** PARTIE FONCTIONS ********************************/
             /*******************************************************************************************************/            
             /* Affichage des marqueurs en fonction des données des écoles */
             function donneesEcoles(dataEcoles) {
@@ -253,13 +248,12 @@
                 var form = infos[1];
                 let superficie = $(form).find('.superficie').val();
                 let note = $(form).find('input[type=radio]:checked').val();
-                console.log("Parc : nom ", nom, "superficie", superficie, "note", note);
+                console.log("Nom ", nom, " Superficie : ", superficie, " Note : ", note, " Distance : ", parc.distance);
 
                 /* Si on a pas encore mis tous les meilleurs parcs pour l'école choisie */
                 if( $(popupEcole)[0].childElementCount < n ) {
-                	$(popupEcole).append('<li id="' + note + '" > nom : ' + nom + " superficie : " + superficie + " note : " + note + "</li>");
+                    $(popupEcole).append('<li id="' + note + '" > nom : ' + nom + " superficie : " + superficie + " note : " + note + "</li>");
                 } 
-                // !! TODO  ACTUALISER si on change la note
             }
 
             /* Trouve les n parcs les plus proches d'une école sélectionnée 
@@ -268,18 +262,24 @@
             function nParcsProches(popupEcole, posEcole, parc, n) {
                 var markers = [];  // liste de tous les markers des parcs proches
                 var parcs = [];  // "n-ième" parc à la position n-1 dans le tableau
+                var parcsProches = []; // stocke les résultats trouvés de manière simple : nomParc, distanceParc, noteParc
 
                 // Recherche du parc1
                 if (parc == null) { 
                     parc = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le parc le plus proche de l'école sélectionnée
-                    //var distance = parc.distance;  // TODO afficher dans un tableau sur le site => + avoir tous les parcs dans un rayon autour de l'école => Tri par meilleure note
+                    var distance = parc.distance;
                     var coordsParc = parc.latlng;
+
                     var marker = L.marker([coordsParc.lat, coordsParc.lng])
-                                    .bindPopup("" + 0)
-                                    .addTo(carte);
+                        .bindPopup("Situé a " + distance + " mètres")
+                        .addTo(carte);
                     markers.push(marker);
                     parcs.push(parc);  // on garde le 1er parc trouvé
                     getParcInfos(parc, popupEcole, n); /* Affiche le parc dans la popup de l'école la plus proche */
+
+                    var form = ($(parc.layer._popup._content).prop('children'))[1];
+                    var note = $(form).find('input[type=radio]:checked').val();
+                    parcsProches.push( { coords : coordsParc, rating : parseInt(note), distance : parc.distance } ); // sauvegarde la note et la distance du parc trouvé
                 }
 
                 /* recherche d'autres parcs */
@@ -288,14 +288,20 @@
                     Jeux.removeLayer(parc.layer._leaflet_id); // supprime le parc précédent de la liste de recherche
                     parc = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le "n-ième" parc le plus proche de l'école sélectionnée
                     var coordsParc = parc.latlng;
+                    var distance = parc.distance;
+
                     var marker = L.marker([coordsParc.lat, coordsParc.lng])
-                                    .bindPopup("" + i)
-                                    .addTo(carte);
+                        .bindPopup("Situé a " + distance + " mètres")
+                        .addTo(carte);
                     markers.push(marker);
 
                     getParcInfos(parc, popupEcole, n); /* Affiche le parc dans la popup de l'école la plus proche */
                     parcs.push(parc);  // on garde les autres parcs trouvés
                     carte.addLayer(parcs[i-1].layer);  // on remet le l'ancien parc (gardé dans parcs) sur la carte
+
+                    var form = ($(parc.layer._popup._content).prop('children'))[1];
+                    var note = $(form).find('input[type=radio]:checked').val();
+                    parcsProches.push( { coords : coordsParc, rating : parseInt(note), distance : parc.distance } ); // sauvegarde la note et la distance du parc trouvé
                 }
 
                 // A la fin de la recherche, on replace les n parcs trouvés dans la liste des parcs (Jeux)
@@ -309,20 +315,40 @@
                     for ( var j = 0 ; j < markers.length ; j++) {
                         carte.removeLayer(markers[j]);
                     }
-                    // on ne supprime pas les meilleurs parcs CAR on ne modifie pas la liste des parcs
-                    // !! TODO : Actualiser l'ordre des parcs dans la liste si on change la note entre temps ! 
                 });
 
-                // Tri des meilleurs parcs par note :  TODO hashmap(nomEcole, note) triée
-                // TODO Visualisation graphique : 5 = vert, 4 = orange ... sur les marqueurs des parcs
+                // Affichage des meilleurs parcs triés par note
                 $(function(){
-                	var idEcole = $(popupEcole).prop('id');
-				    var elems = $('#' + idEcole).children('li').remove();
-				    elems.sort(function(a,b){
-				        return parseInt(a.id) < parseInt(b.id);
-				    });
-				    $('#' + idEcole).append(elems);
-				});
+                    var idEcole = $(popupEcole).prop('id');
+                    var elems = $('#' + idEcole).children('li').remove();
+                    elems.sort(function(a,b){
+                        return parseInt(a.id) < parseInt(b.id);
+                    });
+                    $('#' + idEcole).append(elems);
+                });
+
+                /* Visualisation graphique : 5/5 = vert
+                 * Tri des parcs par NOTE afin de mettre en valeur le meilleur
+                 */
+                 parcsProches.sort(function (a, b) {
+                    return a.rating < b.rating;
+                 });
+
+                var iconeVert = new L.Icon({
+                  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                  popupAnchor: [1, -34],
+                  shadowSize: [41, 41]
+                });
+
+                // Marker pour le meilleur parc note / distance
+                var meilleurParc = parcsProches[0];
+                var marker = L.marker([meilleurParc.coords.lat, meilleurParc.coords.lng], {icon : iconeVert})
+                    .bindPopup("Situé a " + meilleurParc.distance + " mètres")
+                    .addTo(carte);
+                markers.push(marker);  // dans l'ensemble des markers de l'école pour le supprimer plus tard
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
@@ -331,48 +357,48 @@
                 var posEcole = new L.latLng(coords.lat, coords.lng);
 
                 var n = 5;  // les n parcs les plus proches
-            	var popupEcole = $(e.target._popup._content).find('ul');
+                var popupEcole = $(e.target._popup._content).find('ul');
                 nParcsProches(popupEcole, posEcole, null, n);
             }    
-			
+            
 
-			/************************ PARTIE STATS ************************/
-			function getRandomColor() {
-				var letters = '0123456789ABCDEF';
-				var color = '#';
-				for (var i = 0; i < 6; i++) {
-					color += letters[Math.floor(Math.random() * 16)];
-				}
-				return color;
-			}
+            /************************ PARTIE STATS ************************/
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
 
-			function Stats(){
-				var effectifs = [];
-				var nomEffectifs = [];	
-				for(var i = dataEcoles.length-1; i > dataEcoles.length-11 ; i--){
-					effectifs.push(dataEcoles[i].effectif);
-					nomEffectifs.push(dataEcoles[i].ecole);
-				}
-				new Chart(document.getElementById("pie-chart"),{
-					type : 'pie',
-					data: {
-						labels: nomEffectifs,
-						datasets: [{
-							label: "Test",
-							backgroundColor: [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
-							data: effectifs
-						}]
-					},
-					options: {
-						title: {
-							display: true,
-							text: 'Effectif des dix plus grandes écoles Toulousaines'
-						}
-					}
-				});
-			}
+            function Stats(){
+                var effectifs = [];
+                var nomEffectifs = [];  
+                for(var i = dataEcoles.length-1; i > dataEcoles.length-11 ; i--){
+                    effectifs.push(dataEcoles[i].effectif);
+                    nomEffectifs.push(dataEcoles[i].ecole);
+                }
+                new Chart(document.getElementById("pie-chart"),{
+                    type : 'pie',
+                    data: {
+                        labels: nomEffectifs,
+                        datasets: [{
+                            label: "Test",
+                            backgroundColor: [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+                            data: effectifs
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Effectif des dix plus grandes écoles Toulousaines'
+                        }
+                    }
+                });
+            }
 
-			Stats();
+            Stats();
         </script>
     </body>
 </html>
