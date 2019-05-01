@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        <link rel="stylesheet" href="includes/leaflet.css" />
-        <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
+         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
+         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+       integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+       crossorigin=""/>
 
-        <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+       integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+       crossorigin=""></script>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+        <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
         <script type="text/javascript" src="includes/jquery.min.js"></script>
-        <script type="text/javascript" src="includes/leaflet.geometryutil.min.js"></script>
+        <script type="text/javascript" src="includes/leaflet.geometryutil.js"></script>
         <script type="text/javascript" src="includes/Chart.min.js"></script>
         
         <title>Projet Web3</title>
@@ -33,7 +41,6 @@
     </head>
 
     <body>
-
         <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
         <div id="macarte" style="width: 80%; height: 600px;"></div>
         
@@ -90,6 +97,7 @@
             L.control.layers({},overlays).addTo(carte);
             Jeux.addTo(carte);  // Affichage des aires de jeux par défaut
             Ecoles.addTo(carte);
+
             /*******************************************************************************************************/
                     /******************************** PARTIE FONCTIONS ********************************/
             /*******************************************************************************************************/            
@@ -349,6 +357,14 @@
                     .bindPopup("Situé a " + meilleurParc.distance + " mètres")
                     .addTo(carte);
                 markers.push(marker);  // dans l'ensemble des markers de l'école pour le supprimer plus tard
+
+                /* Affichage du trajet entre l'école et son meilleur parc */
+                L.Routing.control({
+                  waypoints: [
+                    L.latLng(meilleurParc.coords.lat, meilleurParc.coords.lng),
+                    posEcole
+                  ]
+                }).addTo(carte);
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
