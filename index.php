@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
-         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
-       integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
-       crossorigin=""/>
-
-        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
-       integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
-       crossorigin=""></script>
+        <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"/>
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
         <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+        <script type="text/javascript" src="includes/lrm-graphhopper-1.2.0.js"></script>
 
         <script type="text/javascript" src="includes/jquery.min.js"></script>
         <script type="text/javascript" src="includes/leaflet.geometryutil.js"></script>
@@ -359,12 +355,23 @@
                 markers.push(marker);  // dans l'ensemble des markers de l'école pour le supprimer plus tard
 
                 /* Affichage du trajet entre l'école et son meilleur parc */
-                L.Routing.control({
-                  waypoints: [
-                    L.latLng(meilleurParc.coords.lat, meilleurParc.coords.lng),
-                    posEcole
-                  ]
-                }).addTo(carte);
+                var waypoints = [
+                        L.latLng(meilleurParc.coords.lat, meilleurParc.coords.lng),
+                        posEcole
+                ];
+
+                // Pause le temps de visualiser le meilleur parc
+                setTimeout(function(){
+                    L.routing.control({
+                        waypoints: waypoints,
+                        router: L.Routing.graphHopper('0a5a5fb8-1225-419b-bc78-f0c23534d70a', {
+                            urlParameters: {
+                                vehicle: 'foot'
+                            }
+                        })
+                    }).addTo(carte);
+
+                }, 4000);
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
