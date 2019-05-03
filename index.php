@@ -4,18 +4,19 @@
         <link type="text/css" rel="stylesheet" href="CSS/EtoileCSS.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+        <script type="text/javascript" src="includes/leaflet.geometryutil.js"></script>
+        <script type="text/javascript" src="includes/Chart.min.js"></script>
+        <script type="text/javascript" src="includes/jquery.min.js"></script>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
         <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
         <script type="text/javascript" src="includes/lrm-graphhopper-1.2.0.js"></script>
 
-		<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
-		<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+		<link href="includes/bootstrap.css" rel="stylesheet" id="bootstrap-css"/>
+		<script src="includes/bootstrap.js"></script>
 		
-        <script type="text/javascript" src="includes/jquery.min.js"></script>
-        <script type="text/javascript" src="includes/leaflet.geometryutil.js"></script>
-        <script type="text/javascript" src="includes/Chart.min.js"></script>
+
+
         
         <title>Projet Web3</title>
         <!-- Données de la BDD -->
@@ -342,14 +343,6 @@
                     Jeux.addLayer(parcs[j].layer);
                 }
 
-                /* Ecouteur sur les boutons "supprimer" des écoles */
-                $('.ecole').click(function() {
-                    // On supprime les anciens marqueurs 
-                    for ( var j = 0 ; j < markers.length ; j++) {
-                        carte.removeLayer(markers[j]);
-                    }
-                });
-
                 // Affichage des meilleurs parcs triés par note
                 $(function(){
                     var idEcole = $(popupEcole).prop('id');
@@ -390,17 +383,28 @@
                 ];
 
                 // Pause le temps de visualiser le meilleur parc
-                setTimeout(function(){
-                    L.routing.control({
-                        waypoints: waypoints,
-                        router: L.Routing.graphHopper('0a5a5fb8-1225-419b-bc78-f0c23534d70a', {
-                            urlParameters: {
-                                vehicle: 'foot'
-                            }
-                        })
-                    }).addTo(carte);
+                var routes = [];
+                var route = L.routing.control({
+                    waypoints: waypoints,
+                    router: L.Routing.graphHopper('0a5a5fb8-1225-419b-bc78-f0c23534d70a', {
+                        urlParameters: {
+                            vehicle: 'foot'
+                        }
+                    })
+                }).addTo(carte);
+                routes.push(route);  // sauvegarde les routes trouvées pour les supprimer ensuite
 
-                }, 4000);
+                /* Ecouteur sur les boutons "supprimer" des écoles */
+                $('.ecole').click(function() {
+                    // On supprime les anciens marqueurs 
+                    for ( var j = 0 ; j < markers.length ; j++) {
+                        carte.removeLayer(markers[j]);
+                    }
+
+                    for ( var k = 0 ; k < routes.length ; k++) {
+                        carte.removeControl(routes[k]);
+                    }
+                });
             }
 
             /* Le clic sur une école détermine les 3 meilleurs parcs : DISTANCE */
