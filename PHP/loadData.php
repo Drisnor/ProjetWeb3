@@ -3,7 +3,7 @@
 	include "connexionBD.inc.php";
 
 	$ecoles = $cnx->prepare("SELECT * FROM ecoles ORDER BY effectif ASC");
-	$jeux = $cnx->prepare("SELECT * FROM jeux");
+	$jeux = $cnx->prepare("SELECT * FROM jeux ORDER BY nbjeux ASC");
 
 	// FETCH:ASSOC : format des résultats => tableau associatif
 	$ecoles->setFetchMode(PDO::FETCH_ASSOC);

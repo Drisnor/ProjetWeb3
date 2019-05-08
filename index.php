@@ -12,12 +12,9 @@
         <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
         <script type="text/javascript" src="includes/lrm-graphhopper-1.2.0.js"></script>
 
-		<link href="includes/bootstrap.css" rel="stylesheet" id="bootstrap-css"/>
-		<script src="includes/bootstrap.js"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
 		
-
-
-        
         <title>Projet Web3</title>
         <!-- Données de la BDD -->
         <?php include 'PHP/loadData.php' ?>
