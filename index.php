@@ -84,6 +84,9 @@
 		<a id="back-to-top" href="#" class="btn btn-primary btn-lg back-to-top" role="button" title="Click to return on the top page" data-toggle="tooltip" data-placement="left"><span class="glyphicon glyphicon-chevron-up"></span></a>
 	    <!-- Canvas affichage Stats -->
         <canvas id="pie-chart" width="400" height="50"></canvas>
+		<!-- Canvas affichage StatsParc -->
+		<canvas id="bar-chart" width="400" height="100"></canvas>
+
         <!-- Affichage et traitement des données de la carte -->
         <script type="text/javascript">
             /*******************************************************************************************************/
@@ -453,7 +456,7 @@
                     data: {
                         labels: nomEffectifs,
                         datasets: [{
-                            label: "Test",
+                            label: "",
                             backgroundColor: [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
                             data: effectifs
                         }]
@@ -468,6 +471,37 @@
             }
 
             Stats();
+			
+			function StatsParc(){
+				var nombreJeux = [];
+				var nomJeux = [];
+				for(var i = dataJeux.length-1; i > dataJeux.length-11; i--){
+					nombreJeux.push(dataJeux[i].nbjeux);
+					nomJeux.push(dataJeux[i].nom);
+				}
+				new Chart(document.getElementById("bar-chart"), {
+					type: 'bar',
+					data: {
+						labels: nomJeux,
+						datasets: [
+							{
+								label: "",
+								backgroundColor: [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+								data: nombreJeux
+							}
+						]	
+					},
+					options: {
+						legend: { display: false },
+						title: {
+							display: false,
+							text: 'Les dix parcs avec le plus de jeux pour enfant à Toulouse'
+						}
+					}
+				});
+			}
+
+			StatsParc();
         </script>
     </body>
 </html>
