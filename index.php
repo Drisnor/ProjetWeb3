@@ -24,8 +24,10 @@
 
         <style>
             .leaflet-popup-content {
-                width: 200px;
-                height: 300px;
+                min-width: 300px;
+				max-width: 400px;
+				min-height:150px;
+                max-height:300px;
                 /*overflow-y: scroll; (scrollbar) */
             }
 
@@ -38,6 +40,19 @@
             ul li {
                 display: inline-block;
             }
+			body{
+				background-color: #D6DBDF;
+			}
+			
+			h1{
+				text-align:center;
+				font-weight:bolder;
+			}
+			
+			canvas{
+				color:white;
+			}
+
         </style>
 		
 		<script>
@@ -65,8 +80,9 @@
     </head>
 
     <body>
-        <!-- Le conteneur de notre carte (avec une contrainte CSS pour la taille) -->
-        <div id="macarte" style="width: 90%; height: 600px;"></div>
+		<h1>Carte Parcs & Ecoles</h1>
+        <!-- Le conteneur de notre carte  -->
+        <div id="macarte"></div>
         <!-- Button go top -->
 		<a id="back-to-top" href="#" class="btn btn-primary btn-lg back-to-top" role="button" title="Click to return on the top page" data-toggle="tooltip" data-placement="left"><span class="glyphicon glyphicon-chevron-up"></span></a>
 	    <!-- Canvas affichage Stats -->
