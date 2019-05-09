@@ -258,6 +258,7 @@
                     type: 'GET',
                     data: {id: id, superficie: superficie, note:note},
                     success: function(data) {
+                    	alert("Données des parcs mises à jour !");
                         return true;  //modifications locales déjà effectuées
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
