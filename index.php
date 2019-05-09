@@ -50,6 +50,9 @@
 				color:white;
 			}
 
+            th { 
+                padding:10px;
+            } 
         </style>
 		
 		<script>
@@ -153,11 +156,11 @@
                             +    '<td id="adr" name="adr">' + dataEcoles[i].libelle + '</td>'
                             + '</tr>'
                             + '<tr>'
-                            +   '<th>Telephone :</th>'
+                            +   '<th>Telephone : </th>'
                             +   '<td id="tel" name="tel">' + dataEcoles[i].tel + '</td>'
                             + '</tr>'
                         + '</table>'
-                        + '<button class="ecole" type="submit"> Supprimer marqueurs </button>'
+                        + '<button class="ecole btn btn-dark" type="submit"> Supprimer marqueurs </button>'
                         + '</form>'
                         + '<h3> Meilleurs parcs proches : </h3>'
                         + '<ul name="parcs" id="' + dataEcoles[i].id +'">';
@@ -217,7 +220,7 @@
                             +   '<td class='+note+' name="note">' + star + '</td>'
                             + '</tr>'
                         + '</table>'
-                        + '<button data=\"'+ dataJeux[i].id +'\" type="submit">Modifier</button>'
+                        + '<button class="btn btn-secondary" data=\"'+ dataJeux[i].id +'\" type="submit">Modifier</button>'
                         ;
 
                     /* Affichage des données des parcs dans les popups */
