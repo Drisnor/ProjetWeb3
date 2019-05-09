@@ -22,7 +22,7 @@
         <style>
             .leaflet-popup-content {
                 min-width: 300px;
-				max-width: 400px;
+				max-width: 450px;
 				min-height:150px;
                 max-height:300px;
                 /*overflow-y: scroll; (scrollbar) */
@@ -338,7 +338,7 @@
 
                 /* recherche d'autres parcs */
                 // On recherche d'autres parcs proches, en supprimant toujours les parcs trouvés précedemment                   
-                for(var i = 1 ; i < n-1 ; i++) {
+                for(var i = 1 ; i < n ; i++) {
                     Jeux.removeLayer(parc.layer._leaflet_id); // supprime le parc précédent de la liste de recherche
                     parc = L.GeometryUtil.closestLayer(carte, [Jeux], posEcole);  // => Le "n-ième" parc le plus proche de l'école sélectionnée
                     var coordsParc = parc.latlng;
